@@ -872,8 +872,8 @@ h1, h2, h3 {
   grid-template-columns: calc(5.5rem * var(--cart-scale)) 1fr auto;
   gap: calc(1rem * var(--cart-scale)) calc(1.25rem * var(--cart-scale));
   padding: calc(1rem * var(--cart-scale)) calc(1.25rem * var(--cart-scale));
-  min-height: calc(7.5rem * var(--cart-scale));
-  align-items: stretch;
+  min-height: calc(5.5rem * var(--cart-scale));
+  align-items: center;
   transition: background-color var(--duration-normal) var(--ease-snappy);
 }
 
@@ -901,9 +901,8 @@ h1, h2, h3 {
 .cart-row-main {
   display: flex;
   min-width: 0;
-  min-height: calc(5.5rem * var(--cart-scale));
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: center;
   gap: calc(0.75rem * var(--cart-scale));
 }
 
@@ -924,10 +923,9 @@ h1, h2, h3 {
 
 .cart-row-side {
   display: flex;
-  min-height: calc(5.5rem * var(--cart-scale));
   flex-direction: column;
   align-items: flex-end;
-  justify-content: space-between;
+  justify-content: center;
   gap: 0.5rem;
   text-align: right;
 }

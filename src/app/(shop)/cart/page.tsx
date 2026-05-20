@@ -58,9 +58,9 @@ export default async function CartPage() {
         </ul>
       )}
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_280px]">
+      <div className="grid gap-6 lg:grid-cols-[1fr_280px] lg:items-start">
         <ul
-          className="cart-list glass-strong divide-y divide-[var(--outline)] overflow-hidden rounded-xl"
+          className="cart-list glass-strong h-fit w-full self-start divide-y divide-[var(--outline)] overflow-hidden rounded-xl"
           style={
             {
               "--cart-items": lines.length,
