@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { db } from "./db";
-import { addToCart, updateCartItem, clearCart } from "./cart";
+import { addToCart, pruneOrphanCartItems, updateCartItem, clearCart } from "./cart";
 import { isValidOrderQty, normalizeOrderQty } from "./order-qty";
 
 export async function addToCartAction(formData: FormData) {
@@ -18,6 +18,7 @@ export async function addToCartAction(formData: FormData) {
   const safeQty = normalizeOrderQty(qty, product.stock);
   if (!isValidOrderQty(safeQty, product.stock)) return;
   await addToCart(productId, safeQty);
+  await pruneOrphanCartItems();
   revalidatePath("/cart");
   revalidatePath("/");
 }

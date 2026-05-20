@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { CartQtyStepper } from "@/components/shop/cart-qty-stepper";
 import { PaperCupIcon } from "@/components/shop/paper-cup-icon";
 import { ProductGraphic } from "@/components/shop/product-graphic";
-import { getCart, pruneOrphanCartItems } from "@/lib/cart";
+import { getSanitizedCart } from "@/lib/cart";
 import { getCouponCodeFromCookie } from "@/lib/coupon-cookie";
 import { getAppliedCouponFromCookie } from "@/lib/coupons";
 import { resolveCart } from "@/lib/resolve-cart";
@@ -13,8 +13,7 @@ import { quoteOrder } from "@/lib/shipping";
 import { formatPrice } from "@/lib/utils";
 
 export default async function CartPage() {
-  await pruneOrphanCartItems();
-  const items = await getCart();
+  const items = await getSanitizedCart();
   const { lines, totalCents: subtotalCents, errors } = await resolveCart(items);
   const [initialCouponCode, initialAppliedCoupon] = await Promise.all([
     getCouponCodeFromCookie(),

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { CheckoutExperience } from "@/components/shop/checkout-experience";
-import { getCart, pruneOrphanCartItems } from "@/lib/cart";
+import { getSanitizedCart } from "@/lib/cart";
 import { getCouponCodeFromCookie } from "@/lib/coupon-cookie";
 import { getAppliedCouponFromCookie } from "@/lib/coupons";
 import { getDirectPaymentEmails } from "@/lib/payments/direct-contact";
@@ -8,8 +8,7 @@ import { resolveCart } from "@/lib/resolve-cart";
 import { getStoreSettings } from "@/lib/settings";
 
 export default async function CheckoutPage() {
-  await pruneOrphanCartItems();
-  const [items, settings] = await Promise.all([getCart(), getStoreSettings()]);
+  const [items, settings] = await Promise.all([getSanitizedCart(), getStoreSettings()]);
   const { lines, totalCents: subtotalCents, errors } = await resolveCart(items);
   const [initialCouponCode, initialAppliedCoupon] = await Promise.all([
     getCouponCodeFromCookie(),

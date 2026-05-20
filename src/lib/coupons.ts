@@ -2,6 +2,15 @@ import { db } from "@/lib/db";
 import { getCouponCodeFromCookie } from "@/lib/coupon-cookie";
 import type { Coupon, CouponType } from "@/generated/prisma/client";
 
+function isMissingCouponTable(error: unknown): boolean {
+  if (!error || typeof error !== "object") return false;
+  const maybeError = error as { code?: unknown; meta?: { modelName?: unknown } };
+  return (
+    maybeError.code === "P2021" &&
+    (maybeError.meta?.modelName === "Coupon" || maybeError.meta?.modelName == null)
+  );
+}
+
 export type AppliedCoupon = {
   code: string;
   type: CouponType;
@@ -25,7 +34,13 @@ export async function validateCouponCode(
     return { ok: false, error: "Cart is empty." };
   }
 
-  const row = await db.coupon.findUnique({ where: { code } });
+  let row: Coupon | null = null;
+  try {
+    row = await db.coupon.findUnique({ where: { code } });
+  } catch (error) {
+    if (!isMissingCouponTable(error)) throw error;
+    return { ok: false, error: "Coupons are unavailable right now." };
+  }
 
   if (!row) {
     return { ok: false, error: "Invalid coupon code." };

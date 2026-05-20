@@ -63,8 +63,8 @@ export async function clearCart(): Promise<void> {
   store.delete(CART_COOKIE);
 }
 
-/** Drop cart lines whose product no longer exists in the database. */
-export async function pruneOrphanCartItems(): Promise<CartItem[]> {
+/** Read cart without orphan product IDs (safe during Server Component render). */
+export async function getSanitizedCart(): Promise<CartItem[]> {
   const { db } = await import("@/lib/db");
   const items = await getCart();
   if (items.length === 0) return items;
@@ -75,9 +75,14 @@ export async function pruneOrphanCartItems(): Promise<CartItem[]> {
     select: { id: true },
   });
   const existingIds = new Set(existing.map((row) => row.id));
-  const kept = items.filter((item) => existingIds.has(item.productId));
+  return items.filter((item) => existingIds.has(item.productId));
+}
 
-  if (kept.length !== items.length) {
+/** Persist orphan cleanup — call from Server Actions only (not page render). */
+export async function pruneOrphanCartItems(): Promise<CartItem[]> {
+  const kept = await getSanitizedCart();
+  const current = await getCart();
+  if (kept.length !== current.length) {
     await setCart(kept);
   }
   return kept;
