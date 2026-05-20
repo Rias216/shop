@@ -32,8 +32,28 @@ export const DEFAULT_SETTINGS: Omit<StoreSettings, "updatedAt"> = {
   emailFrom: "orders@peptides.cafe",
 };
 
+function isMissingStoreSettingsTable(error: unknown): boolean {
+  if (!error || typeof error !== "object") return false;
+  const maybeError = error as {
+    code?: unknown;
+    meta?: {
+      modelName?: unknown;
+    };
+  };
+  return (
+    maybeError.code === "P2021" &&
+    (maybeError.meta?.modelName === "StoreSettings" || maybeError.meta?.modelName == null)
+  );
+}
+
 export const getStoreSettings = cache(async (): Promise<StoreSettings> => {
-  const row = await db.storeSettings.findUnique({ where: { id: SETTINGS_ID } });
+  let row: StoreSettings | null = null;
+  try {
+    row = await db.storeSettings.findUnique({ where: { id: SETTINGS_ID } });
+  } catch (error) {
+    // Keep storefront/admin pages functional while DB is being initialized.
+    if (!isMissingStoreSettingsTable(error)) throw error;
+  }
   if (row) {
     return {
       ...row,
