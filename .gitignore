@@ -20,8 +20,13 @@
 # production
 /build
 
+# local sqlite databases
+*.db
+*.db-journal
+
 # misc
 .DS_Store
+Thumbs.db
 *.pem
 
 # debug
@@ -30,12 +35,31 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
-.env*
+# env files — commit .env.example only
+.env
+.env.*
+!.env.example
 
 # vercel
 .vercel
 
-# typescript
+# typescript / tooling
 *.tsbuildinfo
 next-env.d.ts
+.turbo
+
+# prisma client (generated on npm install)
+/src/generated/prisma
+
+# cursor / editor local state
+.cursor/
+.idea/
+.vscode/
+
+# runtime user uploads (demo sample COA is whitelisted)
+/public/uploads/*
+!/public/uploads/.gitkeep
+!/public/uploads/sample-coa.pdf
+
+# deploy secrets (examples are committed)
+deploy/**/stack.env

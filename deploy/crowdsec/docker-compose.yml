@@ -1,0 +1,53 @@
+version: "3.9"
+
+services:
+  app:
+    image: node:22-alpine
+    working_dir: /app
+    command: sh -c "npm ci && npm run build && npm run start"
+    env_file:
+      - ../../.env
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+    volumes:
+      - ../../:/app
+    expose:
+      - "3000"
+    restart: unless-stopped
+
+  crowdsec:
+    image: crowdsecurity/crowdsec:latest
+    container_name: crowdsec
+    environment:
+      - COLLECTIONS=crowdsecurity/http-cve crowdsecurity/base-http-scenarios
+      - GID=1000
+    volumes:
+      - crowdsec_data:/var/lib/crowdsec/data/
+      - crowdsec_config:/etc/crowdsec/
+      - caddy_logs:/var/log/caddy:ro
+    restart: unless-stopped
+
+  caddy:
+    image: caddy:2.8
+    container_name: caddy
+    depends_on:
+      - app
+    env_file:
+      - ./stack.env
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ../caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+      - caddy_logs:/var/log/caddy
+    restart: unless-stopped
+
+volumes:
+  caddy_data:
+  caddy_config:
+  caddy_logs:
+  crowdsec_data:
+  crowdsec_config:
