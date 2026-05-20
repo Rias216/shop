@@ -16,5 +16,5 @@
 		Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=()"
 	}
 
-	reverse_proxy app:3000
+	reverse_proxy app:3001
 }

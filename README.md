@@ -31,7 +31,7 @@ npm run dev
 3. In `.env`, use `DATABASE_URL="postgresql://postgres:postgres@localhost:5432/research_store"`.
 4. Run `docker compose up -d`, then `npm run db:push` and `npm run db:seed`.
 
-Open [http://localhost:3000](http://localhost:3000). Admin: [http://localhost:3000/admin/login](http://localhost:3000/admin/login) — default `admin@example.com` / `admin123` (see `.env`).
+Open [http://localhost:3001](http://localhost:3001). Admin: [http://localhost:3001/admin/login](http://localhost:3001/admin/login) — default `admin@example.com` / `admin123` (see `.env`).
 
 Configure the store at **Admin → Settings**: site name, legal copy, blocked countries, PayPal, BTCPay, and Resend email. Secrets are stored in the database; leave a password field blank to keep the current value.
 

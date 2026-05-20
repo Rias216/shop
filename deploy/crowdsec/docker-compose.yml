@@ -9,11 +9,11 @@ services:
       - ../../.env
     environment:
       NODE_ENV: production
-      PORT: 3000
+      PORT: 3001
     volumes:
       - ../../:/app
     expose:
-      - "3000"
+      - "3001"
     restart: unless-stopped
 
   crowdsec:
