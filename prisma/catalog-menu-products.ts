@@ -48,48 +48,98 @@ function glpKit(
   };
 }
 
+function groupedPeptideKit(args: {
+  name: string;
+  slug: string;
+  sku: string;
+  category: ProductCategory;
+  mg: number;
+  listUsd: number;
+  purity?: string;
+  groupKey: string;
+  extra?: string;
+}): CatalogProductSeed {
+  return {
+    name: `${args.name} ${args.mg}mg Research Kit`,
+    slug: args.slug,
+    sku: args.sku,
+    category: args.category,
+    description: DESC(`${args.name} research peptide`, args.mg, args.extra),
+    priceCents: usd2x(args.listUsd),
+    stock: 100,
+    purity: args.purity ?? "≥98%",
+    images: peptideImage,
+    groupKey: args.groupKey,
+    variantLabel: `${args.mg}mg`,
+  };
+}
+
 export const catalogMenuProducts: CatalogProductSeed[] = [
-  // Retatrutide — 5–30 mg (menu list; store 2×, 5 vials/kit)
+  // Retatrutide — 5–60 mg
   glpKit("Retatrutide", 5, "RT5", 80),
   glpKit("Retatrutide", 10, "RT10", 130),
   glpKit("Retatrutide", 15, "RT15", 180),
   glpKit("Retatrutide", 20, "RT20", 198),
   glpKit("Retatrutide", 30, "RT30", 260),
+  glpKit("Retatrutide", 40, "RT40", 290),
+  glpKit("Retatrutide", 50, "RT50", 340),
+  glpKit("Retatrutide", 60, "RT60", 380),
 
-  // Tirzepatide — 5–30 mg
+  // Tirzepatide — 5–120 mg
   glpKit("Tirzepatide", 5, "TR5", 55),
   glpKit("Tirzepatide", 10, "TR10", 78),
   glpKit("Tirzepatide", 15, "TR15", 98),
   glpKit("Tirzepatide", 20, "TR20", 108),
   glpKit("Tirzepatide", 30, "TR30", 138),
+  glpKit("Tirzepatide", 40, "TR40", 170),
+  glpKit("Tirzepatide", 60, "TR60", 250),
+  glpKit("Tirzepatide", 120, "TR120", 450),
 
-  // Second sheet — one strength each (10mg unless noted)
-  {
-    name: "Sermorelin 10mg Research Kit",
-    slug: "sermorelin-10mg",
-    sku: "PEP-SERMO10",
+  // Sermorelin — 5 mg, 10 mg
+  groupedPeptideKit({
+    name: "Sermorelin",
+    slug: "sermorelin-5mg",
+    sku: "SERMO5",
     category: ProductCategory.GROWTH_SECRETAGOGUE,
-    description: DESC("Sermorelin research peptide", 10),
-    priceCents: usd2x(150),
-    stock: 100,
-    purity: "≥98%",
-    images: peptideImage,
-  },
-  {
-    name: "MOTS-c 10mg Research Kit",
+    mg: 5,
+    listUsd: 121,
+    groupKey: "sermorelin",
+  }),
+  groupedPeptideKit({
+    name: "Sermorelin",
+    slug: "sermorelin-10mg",
+    sku: "SERMO10",
+    category: ProductCategory.GROWTH_SECRETAGOGUE,
+    mg: 10,
+    listUsd: 150,
+    groupKey: "sermorelin",
+  }),
+
+  // MOTS-c — 10 mg, 40 mg
+  groupedPeptideKit({
+    name: "MOTS-c",
     slug: "mots-c-10mg",
-    sku: "PEP-MOTSC10",
+    sku: "MOTS-C10",
     category: ProductCategory.MITOCHONDRIAL,
-    description: DESC("MOTS-c mitochondrial peptide", 10),
-    priceCents: usd2x(75),
-    stock: 100,
-    purity: "≥98%",
-    images: peptideImage,
-  },
+    mg: 10,
+    listUsd: 75,
+    groupKey: "mots-c",
+  }),
+  groupedPeptideKit({
+    name: "MOTS-c",
+    slug: "mots-c-40mg",
+    sku: "MOTS-C40",
+    category: ProductCategory.MITOCHONDRIAL,
+    mg: 40,
+    listUsd: 200,
+    groupKey: "mots-c",
+  }),
+
+  // Single-strength entries from second sheet
   {
     name: "Semax 10mg Research Kit",
     slug: "semax-10mg",
-    sku: "PEP-SX10",
+    sku: "SX10",
     category: ProductCategory.NEUROPEPTIDE,
     description: DESC("Semax research peptide", 10),
     priceCents: usd2x(55),
@@ -100,7 +150,7 @@ export const catalogMenuProducts: CatalogProductSeed[] = [
   {
     name: "Selank 10mg Research Kit",
     slug: "selank-10mg",
-    sku: "PEP-SK10",
+    sku: "SK10",
     category: ProductCategory.NEUROPEPTIDE,
     description: DESC("Selank research peptide", 10),
     priceCents: usd2x(55),
@@ -111,7 +161,7 @@ export const catalogMenuProducts: CatalogProductSeed[] = [
   {
     name: "SLU-PP-332 5mg Research Kit",
     slug: "slu-pp-332-5mg",
-    sku: "PEP-SLUPP332",
+    sku: "SLUPP332",
     category: ProductCategory.MITOCHONDRIAL,
     description: DESC("SLU-PP-332 research compound", 5),
     priceCents: usd2x(65),
@@ -122,7 +172,7 @@ export const catalogMenuProducts: CatalogProductSeed[] = [
   {
     name: "Epithalon 10mg Research Kit",
     slug: "epithalon-10mg",
-    sku: "PEP-EPI10",
+    sku: "EPI10",
     category: ProductCategory.LONGEVITY,
     description: DESC("Epithalon research peptide", 10),
     priceCents: usd2x(55),
@@ -133,7 +183,7 @@ export const catalogMenuProducts: CatalogProductSeed[] = [
   {
     name: "SS-31 10mg Research Kit",
     slug: "ss-31-10mg",
-    sku: "PEP-SS31",
+    sku: "SS31",
     category: ProductCategory.MITOCHONDRIAL,
     description: DESC("SS-31 research peptide", 10),
     priceCents: usd2x(100),
@@ -144,7 +194,7 @@ export const catalogMenuProducts: CatalogProductSeed[] = [
   {
     name: "Ipamorelin 10mg Research Kit",
     slug: "ipamorelin-10mg",
-    sku: "PEP-IPA10",
+    sku: "IPA10",
     category: ProductCategory.GROWTH_SECRETAGOGUE,
     description: DESC("Ipamorelin research peptide", 10),
     priceCents: usd2x(75),
@@ -155,7 +205,7 @@ export const catalogMenuProducts: CatalogProductSeed[] = [
   {
     name: "MT-2 10mg Research Kit",
     slug: "mt-2-10mg",
-    sku: "PEP-MT2",
+    sku: "MT2",
     category: ProductCategory.MELANOCORTIN,
     description: DESC("MT-2 research peptide", 10),
     priceCents: usd2x(55),
@@ -163,21 +213,30 @@ export const catalogMenuProducts: CatalogProductSeed[] = [
     purity: "≥98%",
     images: peptideImage,
   },
-  {
-    name: "CJC-1295 (no DAC) 10mg Research Kit",
-    slug: "cjc-1295-10mg",
-    sku: "PEP-CJC10",
+  groupedPeptideKit({
+    name: "CJC-1295 (no DAC)",
+    slug: "cjc-1295-5mg",
+    sku: "CJC5",
     category: ProductCategory.GROWTH_SECRETAGOGUE,
-    description: DESC("CJC-1295 without DAC research peptide", 10),
-    priceCents: usd2x(155),
-    stock: 100,
-    purity: "≥98%",
-    images: peptideImage,
-  },
+    mg: 5,
+    listUsd: 90,
+    groupKey: "cjc-1295-no-dac",
+    extra: "Without DAC.",
+  }),
+  groupedPeptideKit({
+    name: "CJC-1295 (no DAC)",
+    slug: "cjc-1295-10mg",
+    sku: "CJC10",
+    category: ProductCategory.GROWTH_SECRETAGOGUE,
+    mg: 10,
+    listUsd: 155,
+    groupKey: "cjc-1295-no-dac",
+    extra: "Without DAC.",
+  }),
   {
     name: "TB-500 + BPC-157 Blend 10mg Research Kit",
     slug: "tb500-bpc157-10mg",
-    sku: "PEP-BB10",
+    sku: "BB10",
     category: ProductCategory.HEALING_REPAIR,
     description: DESC("TB-500 and BPC-157 blend", 10, "Dual-peptide research formulation."),
     priceCents: usd2x(120),
@@ -188,7 +247,7 @@ export const catalogMenuProducts: CatalogProductSeed[] = [
   {
     name: "KPV 10mg Research Kit",
     slug: "kpv-10mg",
-    sku: "PEP-KPV",
+    sku: "KPV",
     category: ProductCategory.HEALING_REPAIR,
     description: DESC("KPV research peptide", 10),
     priceCents: usd2x(55),
@@ -197,9 +256,23 @@ export const catalogMenuProducts: CatalogProductSeed[] = [
     images: peptideImage,
   },
   {
+    name: "Bacteriostatic Water 3ml Research Kit",
+    slug: "bac-water-3ml",
+    sku: "BAC3",
+    category: ProductCategory.SUPPLIES,
+    description:
+      "Bacteriostatic water for laboratory reconstitution. 3ml/vial, 10 vials/kit. Not for injection or human use.",
+    priceCents: usd2x(10),
+    stock: 100,
+    purity: "≥99%",
+    images: peptideImage,
+    groupKey: "bac-water",
+    variantLabel: "3ml",
+  },
+  {
     name: "Bacteriostatic Water 10ml Research Kit",
     slug: "bac-water-10ml",
-    sku: "PEP-BAC10",
+    sku: "BAC10",
     category: ProductCategory.SUPPLIES,
     description:
       "Bacteriostatic water for laboratory reconstitution. 10ml/vial, 10 vials/kit. Not for injection or human use.",
@@ -207,5 +280,7 @@ export const catalogMenuProducts: CatalogProductSeed[] = [
     stock: 100,
     purity: "≥99%",
     images: peptideImage,
+    groupKey: "bac-water",
+    variantLabel: "10ml",
   },
 ];
