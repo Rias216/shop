@@ -23,6 +23,10 @@ export default async function AdminReviewsPage({
       ? (statusParam as ReviewStatus)
       : undefined;
 
+  const returnTo = statusFilter
+    ? `/admin/reviews?status=${statusFilter}`
+    : "/admin/reviews";
+
   const reviews = await db.review.findMany({
     where: statusFilter ? { status: statusFilter } : undefined,
     orderBy: { createdAt: "desc" },
@@ -105,7 +109,11 @@ export default async function AdminReviewsPage({
                     Submitted {review.createdAt.toLocaleString()}
                   </p>
                 </div>
-                <ReviewModerationActions reviewId={review.id} status={review.status} />
+                <ReviewModerationActions
+                  reviewId={review.id}
+                  status={review.status}
+                  returnTo={returnTo}
+                />
               </div>
             </li>
           ))}

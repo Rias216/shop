@@ -12,10 +12,10 @@ export default async function EditProductPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ error?: string; saved?: string }>;
+  searchParams: Promise<{ error?: string; saved?: string; coa?: string }>;
 }) {
   const { id } = await params;
-  const { error, saved } = await searchParams;
+  const { error, saved, coa } = await searchParams;
   const product = await db.product.findUnique({
     where: { id },
     include: { coaDocuments: { orderBy: { issuedAt: "desc" } } },
@@ -27,6 +27,11 @@ export default async function EditProductPage({
     <article className="space-y-12">
       <section>
         <h1 className="text-2xl font-bold">Edit product</h1>
+        {coa === "1" && (
+          <p className="mt-4 rounded-lg border border-green-500/30 bg-green-500/10 px-3 py-2 text-sm text-green-800 dark:text-green-200">
+            COA uploaded.
+          </p>
+        )}
         <div className="mt-8">
           <ProductWizard
             product={product}

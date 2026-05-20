@@ -3,12 +3,16 @@
 import { hash, compare } from "bcryptjs";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { PRODUCT_CACHE_TAGS } from "@/lib/product-include";
+import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { redirect } from "next/navigation";
 import { writeFile, mkdir } from "node:fs/promises";
 import path from "node:path";
 import { Prisma } from "@/generated/prisma/client";
 import { auth } from "@/auth";
+import { requireAdmin } from "@/lib/admin-auth";
 import { db } from "@/lib/db";
+import { roundStockToOrderStep } from "@/lib/order-qty";
+import { PRODUCT_CATEGORY_VALUES } from "@/lib/product-categories";
 import {
   ensureUniqueSku,
   ensureUniqueSlug,
@@ -37,15 +41,33 @@ function invalidateProductCaches() {
   revalidateTag(PRODUCT_CACHE_TAGS.catalog, "max");
 }
 
-async function requireAdmin() {
-  const session = await auth();
-  if (!session?.user) throw new Error("Unauthorized");
+function revalidateProductPaths(product: { id: string; slug: string }, previousSlug?: string) {
+  revalidatePath(`/admin/products/${product.id}`);
+  revalidatePath(`/products/${product.slug}`);
+  if (previousSlug && previousSlug !== product.slug) {
+    revalidatePath(`/products/${previousSlug}`);
+  }
+}
+
+function parseCategory(raw: FormDataEntryValue | null): ProductCategory {
+  const category = String(raw ?? "").trim();
+  if (!PRODUCT_CATEGORY_VALUES.includes(category as ProductCategory)) {
+    throw new Error("Invalid category");
+  }
+  return category as ProductCategory;
+}
+
+function adminProductErrorRedirect(
+  target: string,
+  code: "validation" | "duplicate" | "unauthorized",
+) {
+  redirect(`${target}?error=${code}`);
 }
 
 function parseProductForm(formData: FormData) {
   const id = (formData.get("id") as string | null) || null;
   const name = String(formData.get("name") ?? "").trim();
-  const category = formData.get("category") as ProductCategory;
+  const category = parseCategory(formData.get("category"));
   const description = String(formData.get("description") ?? "").trim();
   const priceUsd = Number(formData.get("priceCents"));
   const stock = Number(formData.get("stock"));
@@ -63,6 +85,7 @@ function parseProductForm(formData: FormData) {
   if (!description) throw new Error("Description is required");
   if (!Number.isFinite(priceUsd) || priceUsd < 0) throw new Error("Invalid price");
   if (!Number.isFinite(stock) || stock < 0) throw new Error("Invalid stock");
+  const normalizedStock = roundStockToOrderStep(Math.floor(stock));
 
   return {
     id,
@@ -70,7 +93,7 @@ function parseProductForm(formData: FormData) {
     category,
     description,
     priceCents: Math.round(priceUsd * 100),
-    stock: Math.max(0, Math.floor(stock)),
+    stock: normalizedStock,
     purity,
     casNumber,
     skuOverride,
@@ -124,8 +147,17 @@ export async function checkProductDraftAction(input: {
 export async function saveProductAction(formData: FormData) {
   await requireAdmin();
 
-  const parsed = parseProductForm(formData);
-  const { id, name, category, skuOverride, groupKey, variantLabel, ...rest } = parsed;
+  const id = (formData.get("id") as string | null) || null;
+  const errorTarget = id ? `/admin/products/${id}` : "/admin/products/new";
+
+  let parsed;
+  try {
+    parsed = parseProductForm(formData);
+  } catch {
+    adminProductErrorRedirect(errorTarget, "validation");
+  }
+
+  const { name, category, skuOverride, groupKey, variantLabel, ...rest } = parsed!;
 
   const skuBase = skuOverride || skuBaseFromName(name, category);
   const sku = await ensureUniqueSku(db, skuBase, id ?? undefined);
@@ -150,26 +182,34 @@ export async function saveProductAction(formData: FormData) {
 
   try {
     if (id) {
-      const { slug: _slug, ...updateData } = data;
-      await db.product.update({ where: { id }, data: updateData });
+      const existing = await db.product.findUnique({
+        where: { id },
+        select: { slug: true },
+      });
+      if (!existing) adminProductErrorRedirect(errorTarget, "validation");
+
+      const product = await db.product.update({ where: { id }, data });
       revalidatePath("/admin/products");
-      revalidatePath(`/admin/products/${id}`);
+      revalidatePath("/catalog");
       revalidatePath("/");
+      revalidateProductPaths(product, existing!.slug);
       invalidateProductCaches();
       redirect(`/admin/products/${id}?saved=1`);
     } else {
       const product = await db.product.create({ data });
       revalidatePath("/admin/products");
+      revalidatePath("/catalog");
       revalidatePath("/");
+      revalidateProductPaths(product);
       invalidateProductCaches();
       redirect(`/admin/products/${product.id}?saved=1`);
     }
   } catch (error) {
+    if (isRedirectError(error)) throw error;
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
-      const target = id ? `/admin/products/${id}` : "/admin/products/new";
-      redirect(`${target}?error=duplicate`);
+      adminProductErrorRedirect(errorTarget, "duplicate");
     }
-    throw error;
+    adminProductErrorRedirect(errorTarget, "validation");
   }
 }
 
@@ -184,7 +224,7 @@ export async function saveProductGroupAction(formData: FormData) {
 
   const base = String(formData.get("base") ?? "").trim();
   const groupKeyRaw = String(formData.get("groupKey") ?? "").trim();
-  const category = formData.get("category") as ProductCategory;
+  const category = parseCategory(formData.get("category"));
   const description = String(formData.get("description") ?? "").trim();
   const purity = normalizePurityInput(formData.get("purity") as string);
   const casNumber = String(formData.get("casNumber") ?? "").trim() || null;
@@ -193,8 +233,8 @@ export async function saveProductGroupAction(formData: FormData) {
   const legalNotice = useDefaultLegalNotice ? null : legalNoticeRaw || null;
   const isActive = formData.get("isActive") === "on";
 
-  if (!base) throw new Error("Base name is required");
-  if (!description) throw new Error("Description is required");
+  if (!base) redirect("/admin/products/new-group?error=validation");
+  if (!description) redirect("/admin/products/new-group?error=validation");
 
   const groupKey = (groupKeyRaw || slugFromName(base)).toLowerCase();
 
@@ -218,10 +258,14 @@ export async function saveProductGroupAction(formData: FormData) {
         Number.isFinite(v.stock) &&
         v.stock >= 0
       );
-    });
+    })
+    .map((v) => ({
+      ...v,
+      stock: roundStockToOrderStep(Math.floor(v.stock)),
+    }));
 
   if (variants.length === 0) {
-    throw new Error("Add at least one dosage variant");
+    redirect("/admin/products/new-group?error=validation");
   }
 
   // Deduplicate by mg
@@ -261,7 +305,7 @@ export async function saveProductGroupAction(formData: FormData) {
       category,
       description,
       priceCents: Math.round(v.priceUsd * 100),
-      stock: Math.max(0, Math.floor(v.stock)),
+      stock: roundStockToOrderStep(Math.floor(v.stock)),
       purity,
       casNumber,
       isActive,
@@ -273,39 +317,77 @@ export async function saveProductGroupAction(formData: FormData) {
   }
 
   try {
-    await db.$transaction(prepared.map((p) => db.product.create({ data: p })));
+    await db.$transaction(
+      prepared.map((p) =>
+        db.product.upsert({
+          where: { slug: p.slug },
+          create: p,
+          update: {
+            name: p.name,
+            sku: p.sku,
+            category: p.category,
+            description: p.description,
+            priceCents: p.priceCents,
+            stock: p.stock,
+            purity: p.purity,
+            casNumber: p.casNumber,
+            isActive: p.isActive,
+            legalNotice: p.legalNotice,
+            images: p.images,
+            groupKey: p.groupKey,
+            variantLabel: p.variantLabel,
+          },
+        }),
+      ),
+    );
   } catch (error) {
+    if (isRedirectError(error)) throw error;
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
-      redirect(`/admin/products/new-group?error=duplicate`);
+      redirect("/admin/products/new-group?error=duplicate");
     }
-    throw error;
+    redirect("/admin/products/new-group?error=validation");
   }
 
   revalidatePath("/admin/products");
   revalidatePath("/catalog");
   revalidatePath("/");
+  for (const p of prepared) {
+    revalidatePath(`/products/${p.slug}`);
+  }
   invalidateProductCaches();
   redirect(`/admin/products?group=${groupKey}`);
 }
 
 export async function deleteProductAction(formData: FormData) {
   await requireAdmin();
-  const id = formData.get("id") as string;
+  const id = String(formData.get("id") ?? "");
+  if (!id) redirect("/admin/products");
+
+  const existing = await db.product.findUnique({
+    where: { id },
+    select: { slug: true },
+  });
+  if (!existing) redirect("/admin/products");
+
   await db.product.update({ where: { id }, data: { isActive: false } });
   revalidatePath("/admin/products");
+  revalidatePath("/catalog");
   revalidatePath("/");
+  revalidateProductPaths({ id, slug: existing.slug });
   invalidateProductCaches();
   redirect("/admin/products");
 }
 
 export async function uploadCoaAction(formData: FormData) {
   await requireAdmin();
-  const productId = formData.get("productId") as string;
-  const batchCode = formData.get("batchCode") as string;
+  const productId = String(formData.get("productId") ?? "");
+  const batchCode = String(formData.get("batchCode") ?? "").trim();
   const labName = (formData.get("labName") as string) || null;
   const file = formData.get("file") as File;
 
-  if (!file?.size) throw new Error("No file");
+  if (!productId || !batchCode || !file?.size) {
+    redirect(`/admin/products/${productId || ""}?error=coa`);
+  }
 
   const uploadsDir = path.join(process.cwd(), "public", "uploads");
   await mkdir(uploadsDir, { recursive: true });
@@ -323,10 +405,14 @@ export async function uploadCoaAction(formData: FormData) {
     },
   });
 
-  revalidatePath(`/admin/products/${productId}`);
   const product = await db.product.findUnique({ where: { id: productId } });
-  if (product) revalidatePath(`/products/${product.slug}`);
+  if (product) {
+    revalidateProductPaths(product);
+  } else {
+    revalidatePath(`/admin/products/${productId}`);
+  }
   revalidatePath("/");
+  redirect(`/admin/products/${productId}?coa=1`);
 }
 
 export async function updateOrderStatusAction(formData: FormData) {

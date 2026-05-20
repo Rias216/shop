@@ -86,6 +86,14 @@ export function ProductWizard({ product, error, saved, defaultLegalNotice }: Pro
     [isNew, name],
   );
 
+  const effectiveCategory = inferredCategory ?? category;
+
+  useEffect(() => {
+    if (isNew && inferredCategory && inferredCategory !== category) {
+      setCategory(inferredCategory);
+    }
+  }, [isNew, inferredCategory, category]);
+
   const stockNum = Number(stock);
 
   const runDuplicateCheck = useDebouncedCallback((nextName: string) => {
@@ -177,13 +185,18 @@ export function ProductWizard({ product, error, saved, defaultLegalNotice }: Pro
           SKU or URL already in use — adjust the name or set a custom SKU.
         </p>
       )}
+      {error === "validation" && (
+        <p className="mb-4 rounded-lg border border-[var(--warning-border)] bg-[var(--warning-bg)] px-3 py-2 text-sm text-[var(--warning-text)]">
+          Could not save product. Check required fields, category, and stock (multiples of 10).
+        </p>
+      )}
 
       <form action={saveProductAction} className="grid gap-8 lg:grid-cols-[1fr_300px]">
         {product && <input type="hidden" name="id" value={product.id} />}
 
         {/* Hidden mirrors of every field so the server action sees everything regardless of current step */}
         <input type="hidden" name="name" value={name} />
-        <input type="hidden" name="category" value={category} />
+        <input type="hidden" name="category" value={effectiveCategory} />
         <input type="hidden" name="groupKey" value={groupKey} />
         <input type="hidden" name="variantLabel" value={variantLabel} />
         <input type="hidden" name="description" value={description} />
@@ -223,16 +236,14 @@ export function ProductWizard({ product, error, saved, defaultLegalNotice }: Pro
               <fieldset className="space-y-2">
                 <legend className="text-sm font-medium">Category</legend>
                 <div className="grid gap-2 sm:grid-cols-2">
-                  {PRODUCT_CATEGORIES.map((c) => {
-                    const activeCategory = inferredCategory ?? category;
-                    return (
+                  {PRODUCT_CATEGORIES.map((c) => (
                     <button
                       key={c.value}
                       type="button"
                       onClick={() => setCategory(c.value)}
                       className={cn(
                         "rounded-lg border px-3 py-2.5 text-left text-sm transition-colors",
-                        activeCategory === c.value
+                        effectiveCategory === c.value
                           ? "border-accent bg-accent/10 ring-1 ring-accent/40"
                           : "border-[var(--outline-strong)] bg-[var(--glass-bg-subtle)] hover:border-accent/30",
                       )}
@@ -242,8 +253,7 @@ export function ProductWizard({ product, error, saved, defaultLegalNotice }: Pro
                         {c.description}
                       </span>
                     </button>
-                  );
-                  })}
+                  ))}
                 </div>
               </fieldset>
 

@@ -3,13 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { ReviewStatus } from "@/generated/prisma/client";
-import { auth } from "@/auth";
+import { adminReviewsRedirect, requireAdmin } from "@/lib/admin-auth";
 import { db } from "@/lib/db";
-
-async function requireAdmin() {
-  const session = await auth();
-  if (!session?.user) throw new Error("Unauthorized");
-}
 
 async function revalidateReviewPaths(reviewId: string) {
   const review = await db.review.findUnique({
@@ -26,37 +21,48 @@ async function revalidateReviewPaths(reviewId: string) {
 export async function approveReviewAction(formData: FormData) {
   await requireAdmin();
   const id = String(formData.get("id") ?? "");
+  const returnTo = adminReviewsRedirect(String(formData.get("returnTo") ?? ""));
+  if (!id) redirect(returnTo);
+
   await db.review.update({
     where: { id },
     data: { status: ReviewStatus.APPROVED },
   });
   await revalidateReviewPaths(id);
-  redirect("/admin/reviews?status=PENDING");
+  redirect(returnTo);
 }
 
 export async function rejectReviewAction(formData: FormData) {
   await requireAdmin();
   const id = String(formData.get("id") ?? "");
+  const returnTo = adminReviewsRedirect(String(formData.get("returnTo") ?? ""));
+  if (!id) redirect(returnTo);
+
   await db.review.update({
     where: { id },
     data: { status: ReviewStatus.REJECTED },
   });
   await revalidateReviewPaths(id);
-  redirect("/admin/reviews");
+  redirect(returnTo);
 }
 
 export async function deleteReviewAction(formData: FormData) {
   await requireAdmin();
   const id = String(formData.get("id") ?? "");
+  const returnTo = adminReviewsRedirect(String(formData.get("returnTo") ?? ""));
+  if (!id) redirect(returnTo);
+
   const review = await db.review.findUnique({
     where: { id },
     select: { product: { select: { slug: true } } },
   });
+  if (!review) redirect(returnTo);
+
   await db.review.delete({ where: { id } });
   revalidatePath("/admin/reviews");
   revalidatePath("/");
-  if (review?.product.slug) {
+  if (review.product.slug) {
     revalidatePath(`/products/${review.product.slug}`);
   }
-  redirect("/admin/reviews");
+  redirect(returnTo);
 }

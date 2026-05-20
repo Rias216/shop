@@ -32,6 +32,12 @@ function LoginForm() {
     }
   }, [callbackUrl, router, status]);
 
+  useEffect(() => {
+    if (searchParams.get("error") === "session") {
+      setError("Session expired. Sign in again.");
+    }
+  }, [searchParams]);
+
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setLoading(true);
