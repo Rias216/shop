@@ -2,7 +2,7 @@ import { CsrfProvider } from "@/components/shop/csrf-provider";
 import { DisclaimerBanner } from "@/components/shop/disclaimer-banner";
 import { ShopFooter } from "@/components/shop/footer";
 import { ShopHeader } from "@/components/shop/header";
-import { getOrCreateCsrfToken } from "@/lib/csrf";
+import { getCsrfToken } from "@/lib/csrf";
 import { getStoreSettings } from "@/lib/settings";
 
 export default async function ShopLayout({
@@ -12,7 +12,7 @@ export default async function ShopLayout({
 }) {
   const [settings, csrfToken] = await Promise.all([
     getStoreSettings(),
-    getOrCreateCsrfToken(),
+    getCsrfToken(),
   ]);
 
   return (

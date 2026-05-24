@@ -1,26 +1,19 @@
 import "server-only";
 
-import { randomBytes, timingSafeEqual } from "crypto";
-import { cookies } from "next/headers";
-import { cookieSecure } from "@/lib/cookie-secure";
-import { CSRF_COOKIE } from "@/lib/csrf-constants";
+import { timingSafeEqual } from "crypto";
+import { cookies, headers } from "next/headers";
+import { CSRF_COOKIE, CSRF_REQUEST_HEADER } from "@/lib/csrf-constants";
 
 export { CSRF_COOKIE, CSRF_FORM_FIELD } from "@/lib/csrf-constants";
 
-export async function getOrCreateCsrfToken(): Promise<string> {
+/** Read-only — cookie is created in proxy.ts, not in layouts. */
+export async function getCsrfToken(): Promise<string> {
   const store = await cookies();
-  const existing = store.get(CSRF_COOKIE)?.value;
-  if (existing) return existing;
+  const fromCookie = store.get(CSRF_COOKIE)?.value;
+  if (fromCookie) return fromCookie;
 
-  const token = randomBytes(32).toString("hex");
-  store.set(CSRF_COOKIE, token, {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: cookieSecure(),
-    path: "/",
-    maxAge: 60 * 60 * 24,
-  });
-  return token;
+  const h = await headers();
+  return h.get(CSRF_REQUEST_HEADER) ?? "";
 }
 
 export async function verifyCsrfFormToken(formToken: FormDataEntryValue | null): Promise<boolean> {
