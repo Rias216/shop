@@ -136,18 +136,18 @@ export default async function OrderPage({
             {effectiveOrder.subtotalCents > 0 && (
               <div className="flex justify-between">
                 <dt className="text-muted-foreground">Subtotal</dt>
-                <dd className="text-foreground">{formatPrice(effectiveOrder.subtotalCents)}</dd>
+                <dd className="text-price">{formatPrice(effectiveOrder.subtotalCents)}</dd>
               </div>
             )}
             <div className="flex justify-between">
               <dt className="text-muted-foreground">Shipping</dt>
-              <dd className="text-foreground">
+              <dd className="text-price">
                 {effectiveOrder.shippingCents === 0 ? "Free" : formatPrice(effectiveOrder.shippingCents)}
               </dd>
             </div>
             <div className="flex justify-between">
               <dt className="text-muted-foreground">Total</dt>
-              <dd className="font-semibold text-foreground">{formatPrice(effectiveOrder.totalCents)}</dd>
+              <dd className="font-semibold text-price">{formatPrice(effectiveOrder.totalCents)}</dd>
             </div>
             {effectiveOrder.paymentMethod === "MANUAL" && settings.manualPaymentInstructions && (
               <div className="mt-4 rounded-lg border border-[var(--outline)] bg-[var(--glass-bg-subtle)] p-3 text-xs leading-relaxed text-muted-foreground">
@@ -167,7 +167,7 @@ export default async function OrderPage({
                 <span className="text-muted-foreground">
                   {item.product.name} · {formatOrderQty(item.qty)}
                 </span>
-                <span className="font-medium text-foreground">
+                <span className="font-medium text-price">
                   {formatPrice(item.unitPriceCents * item.qty)}
                 </span>
               </li>

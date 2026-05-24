@@ -86,18 +86,18 @@ export function coinAccentColor(code: string): string {
 /** Soft anti-aliased glow for circular coin icons (uses filter, not hard box-shadow rings). */
 export function coinIconGlowFilter(color: string): string {
   return [
-    `drop-shadow(0 0 1px color-mix(in srgb, ${color} 85%, transparent))`,
-    `drop-shadow(0 0 5px color-mix(in srgb, ${color} 55%, transparent))`,
-    `drop-shadow(0 0 10px color-mix(in srgb, ${color} 35%, transparent))`,
+    `drop-shadow(0 0 1px color-mix(in srgb, ${color} 38%, transparent))`,
+    `drop-shadow(0 0 5px color-mix(in srgb, ${color} 25%, transparent))`,
+    `drop-shadow(0 0 10px color-mix(in srgb, ${color} 16%, transparent))`,
   ].join(" ");
 }
 
 /** Selected payment card glow matched to coin brand color. */
 export function coinPaymentCardGlow(color: string): string {
   return [
-    `0 0 0 1px color-mix(in srgb, ${color} 42%, transparent)`,
-    `0 0 16px color-mix(in srgb, ${color} 32%, transparent)`,
-    `0 0 28px color-mix(in srgb, ${color} 14%, transparent)`,
-    `inset 0 0 18px color-mix(in srgb, ${color} 7%, transparent)`,
+    `0 0 0 1px color-mix(in srgb, ${color} 19%, transparent)`,
+    `0 0 16px color-mix(in srgb, ${color} 14%, transparent)`,
+    `0 0 28px color-mix(in srgb, ${color} 6%, transparent)`,
+    `inset 0 0 18px color-mix(in srgb, ${color} 3%, transparent)`,
   ].join(", ");
 }

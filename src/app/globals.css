@@ -41,10 +41,11 @@
   --muted: #475569;
   --accent: #6b8fd4;
   --accent-hover: #b088a8;
-  --accent-glow-outer: 0 0 12px color-mix(in srgb, var(--accent) 42%, transparent), 0 0 22px color-mix(in srgb, var(--accent) 24%, transparent);
-  --accent-glow-outer-hover: 0 0 16px color-mix(in srgb, var(--accent) 52%, transparent), 0 0 28px color-mix(in srgb, var(--accent) 30%, transparent);
-  --accent-glow-text: 0 0 8px color-mix(in srgb, var(--accent) 55%, transparent), 0 0 16px color-mix(in srgb, var(--accent) 32%, transparent);
+  --accent-glow-outer: 0 0 12px color-mix(in srgb, var(--accent) 19%, transparent), 0 0 22px color-mix(in srgb, var(--accent) 11%, transparent);
+  --accent-glow-outer-hover: 0 0 16px color-mix(in srgb, var(--accent) 23%, transparent), 0 0 28px color-mix(in srgb, var(--accent) 14%, transparent);
+  --accent-glow-text: 0 0 8px color-mix(in srgb, var(--accent) 25%, transparent), 0 0 16px color-mix(in srgb, var(--accent) 14%, transparent);
   --price: #15803d;
+  --price-glow-text: 0 0 8px color-mix(in srgb, var(--price) 25%, transparent), 0 0 16px color-mix(in srgb, var(--price) 14%, transparent);
   --outline: rgba(15, 23, 42, 0.1);
   --outline-strong: rgba(15, 23, 42, 0.14);
   --radius-sm: 4px;
@@ -302,6 +303,7 @@ h1, h2, h3 {
 
 .text-price {
   color: var(--price);
+  text-shadow: var(--price-glow-text);
 }
 
 /* Title cards — isolated system sans */
@@ -347,7 +349,7 @@ h1, h2, h3 {
     box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 0%, transparent);
   }
   50% {
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 10%, transparent);
   }
 }
 
@@ -942,6 +944,7 @@ h1, h2, h3 {
   font-size: 1.125rem;
   font-weight: 600;
   color: var(--price);
+  text-shadow: var(--price-glow-text);
   white-space: nowrap;
 }
 
@@ -1030,7 +1033,7 @@ h1, h2, h3 {
 
 .payment-option:not([data-active="true"]):hover {
   border-color: color-mix(in srgb, var(--coin-color) 30%, transparent) !important;
-  box-shadow: 0 0 14px color-mix(in srgb, var(--coin-color) 16%, transparent);
+  box-shadow: 0 0 14px color-mix(in srgb, var(--coin-color) 7%, transparent);
 }
 
 .checkout-coin-search {
@@ -1059,7 +1062,7 @@ h1, h2, h3 {
 .checkout-coin-search-input:focus {
   outline: none;
   border-color: color-mix(in srgb, var(--accent) 55%, var(--outline-strong));
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 14%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 6%, transparent);
 }
 
 .checkout-coin-search-clear {
@@ -1160,7 +1163,7 @@ h1, h2, h3 {
 }
 
 .catalog-search-input:focus-visible {
-  box-shadow: 0 2px 14px color-mix(in srgb, var(--accent) 12%, transparent);
+  box-shadow: 0 2px 14px color-mix(in srgb, var(--accent) 5%, transparent);
 }
 
 .catalog-search-input--active,

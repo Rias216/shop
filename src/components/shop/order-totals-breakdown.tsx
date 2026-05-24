@@ -25,7 +25,7 @@ export function OrderTotalsBreakdown({
     <dl className={className}>
       <div className="flex justify-between gap-3 text-sm">
         <dt className="text-muted-foreground">Subtotal</dt>
-        <dd className="tabular-nums font-medium">{formatPrice(quote.subtotalCents)}</dd>
+        <dd className="tabular-nums font-medium text-price">{formatPrice(quote.subtotalCents)}</dd>
       </div>
       <div className="mt-2 flex justify-between gap-3 text-sm">
         <dt className="text-muted-foreground">
@@ -34,9 +34,9 @@ export function OrderTotalsBreakdown({
             <span className="ml-1 text-xs text-accent">({quote.label})</span>
           )}
         </dt>
-        <dd className="tabular-nums font-medium">
+        <dd className="tabular-nums font-medium text-price">
           {quote.shippingCents === 0 ? (
-            <span className="text-price">Free</span>
+            <span>Free</span>
           ) : (
             formatPrice(quote.shippingCents)
           )}

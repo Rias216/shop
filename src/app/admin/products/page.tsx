@@ -134,7 +134,7 @@ function ProductTable({ rows }: { rows: Row[] }) {
               )}
             </td>
             <td className="font-mono text-xs">{p.sku}</td>
-            <td className="tabular-nums">{formatPrice(p.priceCents)}</td>
+            <td className="tabular-nums text-price">{formatPrice(p.priceCents)}</td>
             <td className="tabular-nums">{p.stock}</td>
             <td>{p.coaCount}</td>
             <td>{p.isActive ? "Yes" : "No"}</td>

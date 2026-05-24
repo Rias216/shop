@@ -53,7 +53,7 @@ export default async function AdminOrderDetailPage({
         </div>
         <div className="flex justify-between">
           <dt className="text-zinc-500">Total</dt>
-          <dd className="font-semibold">{formatPrice(order.totalCents)}</dd>
+          <dd className="font-semibold text-price">{formatPrice(order.totalCents)}</dd>
         </div>
       </dl>
       <section className="mt-6 text-sm">
@@ -80,7 +80,7 @@ export default async function AdminOrderDetailPage({
             <span>
               {item.product.name} · {formatOrderQty(item.qty)}
             </span>
-            <span>{formatPrice(item.unitPriceCents * item.qty)}</span>
+            <span className="text-price tabular-nums">{formatPrice(item.unitPriceCents * item.qty)}</span>
           </li>
         ))}
       </ul>

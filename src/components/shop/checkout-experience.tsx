@@ -90,7 +90,7 @@ export function CheckoutExperience({
                 <p className="truncate font-medium text-foreground">{l.name}</p>
                 <p className="text-xs text-muted-foreground">{formatOrderQty(l.qty)}</p>
               </div>
-              <span className="shrink-0 font-medium tabular-nums text-foreground">
+              <span className="shrink-0 font-medium tabular-nums text-price">
                 {formatPrice(l.lineTotalCents)}
               </span>
             </li>

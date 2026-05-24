@@ -32,7 +32,7 @@ export default async function AdminOrdersPage() {
               <td>
                 {o.paymentMethod} / {o.paymentStatus}
               </td>
-              <td>{formatPrice(o.totalCents)}</td>
+              <td className="text-price tabular-nums">{formatPrice(o.totalCents)}</td>
               <td>{o.createdAt.toLocaleDateString()}</td>
               <td>
                 <Link href={`/admin/orders/${o.id}`} className="underline">
