@@ -1,9 +1,9 @@
 import { redirect } from "next/navigation";
-import { auth } from "@/auth";
+import { getAdminSession } from "@/lib/admin-session-server";
 
 export async function requireAdmin() {
-  const session = await auth();
-  if (!session?.user) {
+  const session = await getAdminSession();
+  if (!session) {
     redirect("/admin/login?error=session");
   }
   return session;

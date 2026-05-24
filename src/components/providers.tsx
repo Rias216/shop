@@ -3,7 +3,6 @@
 import { InstantPrefetch } from "@/components/instant-prefetch";
 import { PageScrollField } from "@/components/page-scroll-field";
 import { applyResolvedTheme, getStoredThemeChoice, resolveTheme, subscribeThemeChanges } from "@/lib/theme-client";
-import { SessionProvider } from "next-auth/react";
 import { useEffect } from "react";
 
 export function Providers({ children }: { children: React.ReactNode }) {
@@ -22,7 +21,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
     <>
       {perfEnabled ? <PageScrollField /> : null}
       <InstantPrefetch />
-      <SessionProvider>{children}</SessionProvider>
+      {children}
     </>
   );
 }

@@ -8,8 +8,8 @@ import { redirect } from "next/navigation";
 import { writeFile, mkdir } from "node:fs/promises";
 import path from "node:path";
 import { Prisma } from "@/generated/prisma/client";
-import { auth } from "@/auth";
 import { requireAdmin } from "@/lib/admin-auth";
+import { getAdminSession } from "@/lib/admin-session-server";
 import { db } from "@/lib/db";
 import { roundStockToOrderStep } from "@/lib/order-qty";
 import { PRODUCT_CATEGORY_VALUES } from "@/lib/product-categories";
@@ -495,8 +495,8 @@ export async function saveStoreSettingsAction(formData: FormData) {
 
 export async function updateAdminPasswordAction(formData: FormData) {
   await requireAdmin();
-  const session = await auth();
-  if (!session?.user?.email) throw new Error("Unauthorized");
+  const session = await getAdminSession();
+  if (!session?.email) redirect("/admin/settings?passwordError=invalid");
 
   const currentPassword = String(formData.get("currentPassword") ?? "");
   const newPassword = String(formData.get("newPassword") ?? "");
@@ -510,7 +510,7 @@ export async function updateAdminPasswordAction(formData: FormData) {
   }
 
   const admin = await db.adminUser.findUnique({
-    where: { email: session.user.email },
+    where: { email: session.email },
   });
   if (!admin) redirect("/admin/settings?passwordError=invalid");
 

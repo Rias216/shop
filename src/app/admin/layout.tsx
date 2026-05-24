@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { auth, signOut } from "@/auth";
+import { adminLogoutAction } from "@/lib/admin-login-actions";
+import { getAdminSession } from "@/lib/admin-session-server";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
 const navLink =
@@ -10,7 +11,7 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const session = await auth();
+  const session = await getAdminSession();
   const isLogin = !session;
 
   return (
@@ -44,12 +45,7 @@ export default async function AdminLayout({
                 Storefront
               </Link>
               <ThemeToggle />
-              <form
-                action={async () => {
-                  "use server";
-                  await signOut({ redirectTo: "/admin/login" });
-                }}
-              >
+              <form action={adminLogoutAction}>
                 <Button type="submit" variant="ghost" size="sm">
                   Sign out
                 </Button>
