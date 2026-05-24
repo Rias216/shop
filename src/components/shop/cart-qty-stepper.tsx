@@ -1,7 +1,9 @@
 "use client";
 
 import { useCallback, useState, useTransition } from "react";
+import { useCsrfToken } from "@/components/shop/csrf-provider";
 import { updateCartAction } from "@/lib/cart-actions";
+import { CSRF_FORM_FIELD } from "@/lib/csrf-constants";
 import {
   ORDER_QTY_STEP,
   clampOrderQty,
@@ -27,6 +29,7 @@ export function CartQtyStepper({
   compact = false,
   className,
 }: Props) {
+  const csrfToken = useCsrfToken();
   const [qty, setQty] = useState(initialQty);
   const [isPending, startTransition] = useTransition();
 
@@ -37,11 +40,12 @@ export function CartQtyStepper({
       const formData = new FormData();
       formData.set("productId", productId);
       formData.set("qty", String(safe));
+      formData.set(CSRF_FORM_FIELD, csrfToken);
       startTransition(async () => {
         await updateCartAction(formData);
       });
     },
-    [productId, stock],
+    [productId, stock, csrfToken],
   );
 
   const remove = () => {
@@ -49,6 +53,7 @@ export function CartQtyStepper({
     const formData = new FormData();
     formData.set("productId", productId);
     formData.set("qty", "0");
+    formData.set(CSRF_FORM_FIELD, csrfToken);
     startTransition(async () => {
       await updateCartAction(formData);
     });

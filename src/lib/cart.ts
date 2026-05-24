@@ -1,4 +1,5 @@
 import { cookies } from "next/headers";
+import { cookieSecure } from "@/lib/cookie-secure";
 
 export type CartItem = {
   productId: string;
@@ -27,6 +28,7 @@ export async function setCart(items: CartItem[]): Promise<void> {
   store.set(CART_COOKIE, JSON.stringify(items), {
     httpOnly: true,
     sameSite: "lax",
+    secure: cookieSecure(),
     path: "/",
     maxAge: 60 * 60 * 24 * 14,
   });

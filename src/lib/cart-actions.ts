@@ -4,9 +4,18 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { db } from "./db";
 import { addToCart, pruneOrphanCartItems, updateCartItem, clearCart } from "./cart";
+import { verifyCsrfFormToken } from "./csrf";
+import { CSRF_FORM_FIELD } from "./csrf-constants";
 import { isValidOrderQty, normalizeOrderQty } from "./order-qty";
 
+async function assertCsrf(formData: FormData): Promise<void> {
+  if (!(await verifyCsrfFormToken(formData.get(CSRF_FORM_FIELD)))) {
+    throw new Error("Invalid CSRF token.");
+  }
+}
+
 export async function addToCartAction(formData: FormData) {
+  await assertCsrf(formData);
   const productId = formData.get("productId") as string;
   const qty = Number(formData.get("qty") ?? 10);
   if (!productId) return;
@@ -24,6 +33,7 @@ export async function addToCartAction(formData: FormData) {
 }
 
 export async function updateCartAction(formData: FormData) {
+  await assertCsrf(formData);
   const productId = formData.get("productId") as string;
   const qty = Number(formData.get("qty") ?? 0);
   if (!productId) return;
@@ -43,7 +53,8 @@ export async function updateCartAction(formData: FormData) {
   revalidatePath("/cart");
 }
 
-export async function clearCartAction() {
+export async function clearCartAction(formData: FormData) {
+  await assertCsrf(formData);
   await clearCart();
   revalidatePath("/cart");
 }

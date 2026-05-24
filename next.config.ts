@@ -16,6 +16,7 @@ const csp = [
 ].join("; ");
 
 const nextConfig: NextConfig = {
+  poweredByHeader: false,
   experimental: {
     serverActions: {
       bodySizeLimit: "10mb",
@@ -34,7 +35,7 @@ const nextConfig: NextConfig = {
         key: "Permissions-Policy",
         value: "camera=(), microphone=(), geolocation=(), payment=()",
       },
-      { key: "Content-Security-Policy-Report-Only", value: csp },
+      { key: "Content-Security-Policy", value: csp },
     ];
 
     if (isProd) {

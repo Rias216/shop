@@ -1,6 +1,8 @@
+import { CsrfProvider } from "@/components/shop/csrf-provider";
 import { DisclaimerBanner } from "@/components/shop/disclaimer-banner";
 import { ShopFooter } from "@/components/shop/footer";
 import { ShopHeader } from "@/components/shop/header";
+import { getOrCreateCsrfToken } from "@/lib/csrf";
 import { getStoreSettings } from "@/lib/settings";
 
 export default async function ShopLayout({
@@ -8,10 +10,13 @@ export default async function ShopLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const settings = await getStoreSettings();
+  const [settings, csrfToken] = await Promise.all([
+    getStoreSettings(),
+    getOrCreateCsrfToken(),
+  ]);
 
   return (
-    <>
+    <CsrfProvider token={csrfToken}>
       <DisclaimerBanner text={settings.researchDisclaimer} />
       <ShopHeader />
       <main className="shop-main-enter relative z-10 flex-1">{children}</main>
@@ -21,6 +26,6 @@ export default async function ShopLayout({
         legalEntity={settings.legalEntity}
         disclaimer={settings.researchDisclaimer}
       />
-    </>
+    </CsrfProvider>
   );
 }

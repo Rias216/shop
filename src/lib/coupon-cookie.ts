@@ -1,4 +1,5 @@
 import { cookies } from "next/headers";
+import { cookieSecure } from "@/lib/cookie-secure";
 
 const COUPON_COOKIE = "research_coupon";
 
@@ -17,6 +18,7 @@ export async function setCouponCodeCookie(code: string | null): Promise<void> {
   store.set(COUPON_COOKIE, code.trim().toUpperCase(), {
     httpOnly: true,
     sameSite: "lax",
+    secure: cookieSecure(),
     path: "/",
     maxAge: 60 * 60 * 24 * 7,
   });

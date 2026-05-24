@@ -2,7 +2,9 @@
 
 import { useCallback, useState } from "react";
 import { SubmitButton } from "@/components/ui/submit-button";
+import { useCsrfToken } from "@/components/shop/csrf-provider";
 import { addToCartAction } from "@/lib/cart-actions";
+import { CSRF_FORM_FIELD } from "@/lib/csrf-constants";
 import {
   ORDER_QTY_STEP,
   ORDER_QTY_MIN_NOTE,
@@ -30,6 +32,7 @@ export function AddToCartControls({
   buttonSize = "sm",
   layout = "stack",
 }: Props) {
+  const csrfToken = useCsrfToken();
   const [qty, setQty] = useState(() =>
     canOrderProduct(stock) ? ORDER_QTY_STEP : 0,
   );
@@ -58,6 +61,7 @@ export function AddToCartControls({
     >
       <input type="hidden" name="productId" value={productId} />
       <input type="hidden" name="qty" value={qty} readOnly />
+      <input type="hidden" name={CSRF_FORM_FIELD} value={csrfToken} />
 
       <div className="cart-stepper" aria-label="Quantity in vials">
         <QtyButton
