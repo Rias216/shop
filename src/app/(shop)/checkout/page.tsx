@@ -45,7 +45,7 @@ export default async function CheckoutPage() {
       <CheckoutExperience
         subtotalCents={subtotalCents}
         cryptoEnabled={settings.cryptoEnabled}
-        directContactEmails={getDirectPaymentEmails(settings)}
+        directContactEmails={getDirectPaymentEmails(settings.emailFrom)}
         initialCouponCode={initialCouponCode}
         initialAppliedCoupon={initialAppliedCoupon}
         lines={lines.map((l) => ({

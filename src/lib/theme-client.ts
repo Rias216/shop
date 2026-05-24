@@ -1,6 +1,6 @@
 "use client";
 
-export type ThemeChoice = "light" | "dark";
+export type ThemeChoice = "light" | "dark" | "system";
 export type ResolvedTheme = "light" | "dark";
 
 const THEME_KEY = "theme";
@@ -8,12 +8,15 @@ const THEME_EVENT = "themechange";
 
 export function getStoredThemeChoice(): ThemeChoice {
   const raw = window.localStorage.getItem(THEME_KEY);
-  if (raw === "light" || raw === "dark") return raw;
-  return "light";
+  if (raw === "light" || raw === "dark" || raw === "system") return raw;
+  return "system";
 }
 
 export function resolveTheme(choice: ThemeChoice): ResolvedTheme {
-  return choice;
+  if (choice === "light" || choice === "dark") return choice;
+  return window.matchMedia("(prefers-color-scheme: dark)").matches
+    ? "dark"
+    : "light";
 }
 
 export function applyResolvedTheme(theme: ResolvedTheme) {
@@ -30,15 +33,21 @@ export function setThemeChoice(choice: ThemeChoice) {
 }
 
 export function subscribeThemeChanges(callback: () => void): () => void {
+  const media = window.matchMedia("(prefers-color-scheme: dark)");
+  const onMedia = () => {
+    if (getStoredThemeChoice() === "system") callback();
+  };
   const onStorage = (event: StorageEvent) => {
     if (event.key === THEME_KEY) callback();
   };
   const onThemeEvent = () => callback();
 
+  media.addEventListener("change", onMedia);
   window.addEventListener("storage", onStorage);
   window.addEventListener(THEME_EVENT, onThemeEvent);
 
   return () => {
+    media.removeEventListener("change", onMedia);
     window.removeEventListener("storage", onStorage);
     window.removeEventListener(THEME_EVENT, onThemeEvent);
   };

@@ -5,7 +5,6 @@ import { db } from "@/lib/db";
 import { formatOrderQty } from "@/lib/order-qty";
 import { formatPrice } from "@/lib/utils";
 import { getStoreSettings } from "@/lib/settings";
-import { getWirePaymentEmail } from "@/lib/payments/direct-contact";
 import { fetchNowPaymentsInvoiceState } from "@/lib/payments/nowpayments";
 import { markOrderPaid } from "@/lib/orders";
 
@@ -32,8 +31,6 @@ export default async function OrderPage({
   ]);
 
   if (!order) notFound();
-
-  const wireContactEmail = getWirePaymentEmail(settings);
 
   let effectiveOrder = order;
 
@@ -152,19 +149,9 @@ export default async function OrderPage({
               <dt className="text-muted-foreground">Total</dt>
               <dd className="font-semibold text-foreground">{formatPrice(effectiveOrder.totalCents)}</dd>
             </div>
-            {effectiveOrder.paymentMethod === "MANUAL" && (
+            {effectiveOrder.paymentMethod === "MANUAL" && settings.manualPaymentInstructions && (
               <div className="mt-4 rounded-lg border border-[var(--outline)] bg-[var(--glass-bg-subtle)] p-3 text-xs leading-relaxed text-muted-foreground">
-                {settings.manualPaymentInstructions ? (
-                  <p>{settings.manualPaymentInstructions}</p>
-                ) : (
-                  <p>Complete payment by bank transfer or wire.</p>
-                )}
-                <p className="mt-3">
-                  Wire / bank contact:{" "}
-                  <a href={`mailto:${wireContactEmail}`} className="font-medium text-accent hover:underline">
-                    {wireContactEmail}
-                  </a>
-                </p>
+                {settings.manualPaymentInstructions}
               </div>
             )}
             {effectiveOrder.trackingNumber && (

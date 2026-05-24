@@ -135,7 +135,6 @@ async function main() {
       cryptoEnabled: Boolean(process.env.NOWPAYMENTS_API_KEY),
       resendApiKey: process.env.RESEND_API_KEY ?? "",
       emailFrom: process.env.EMAIL_FROM ?? DEFAULT_SETTINGS.emailFrom,
-      manualPaymentEmail: process.env.MANUAL_PAYMENT_EMAIL ?? "",
       blockedCountries: process.env.BLOCKED_COUNTRIES ?? DEFAULT_SETTINGS.blockedCountries,
     },
   });
