@@ -35,8 +35,8 @@ export function getCoinIconUrl(code: string): string {
 
 /** Brand accent colors for fallback badges when CDN misses. */
 const COIN_ACCENT_COLORS: Record<string, string> = {
-  sol: "#9945FF",
-  solana: "#9945FF",
+  sol: "#9333ea",
+  solana: "#9333ea",
 };
 
 /** Stable accent for fallback badge when CDN misses. */
