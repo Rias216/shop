@@ -7,7 +7,7 @@ import {
   assertPayCurrencyAllowed,
   createNowPaymentsInvoice,
 } from "@/lib/payments/nowpayments";
-import { notifyAwaitingPayment, orderPublicUrl } from "@/lib/orders";
+import { notifyOrderPlaced, orderPublicUrl } from "@/lib/orders";
 import { unitPricePerVialCents } from "@/lib/pricing";
 import { resolveCart } from "@/lib/resolve-cart";
 import { redeemCoupon, validateCouponCode } from "@/lib/coupons";
@@ -201,10 +201,9 @@ export async function POST(request: Request) {
 
     if (body.paymentMethod === "MANUAL") {
       await perf.time("notify_manual", () =>
-        notifyAwaitingPayment({
+        notifyOrderPlaced({
         orderId: order.id,
         email: body.email,
-        totalCents,
         accessToken: order.accessToken,
         paymentUrl: orderUrl,
         paymentMethod: "Bank transfer / wire",
@@ -227,10 +226,9 @@ export async function POST(request: Request) {
       );
       redirectUrl = paypal.approvalUrl;
       await perf.time("notify_paypal", () =>
-        notifyAwaitingPayment({
+        notifyOrderPlaced({
         orderId: order.id,
         email: body.email,
-        totalCents,
         accessToken: order.accessToken,
         paymentUrl: paypal.approvalUrl,
         paymentMethod: "PayPal",
@@ -264,10 +262,9 @@ export async function POST(request: Request) {
       redirectUrl = invoice.invoiceUrl;
       const coinLabel = payCurrency.toUpperCase();
       await perf.time("notify_crypto", () =>
-        notifyAwaitingPayment({
+        notifyOrderPlaced({
         orderId: order.id,
         email: body.email,
-        totalCents,
         accessToken: order.accessToken,
         paymentUrl: invoice.invoiceUrl,
         paymentMethod: `${coinLabel} (NOWPayments)`,

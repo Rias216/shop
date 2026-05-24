@@ -3,8 +3,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   saveStoreSettingsAction,
+  sendTestEmailAction,
   updateAdminPasswordAction,
 } from "@/lib/admin-actions";
+import { isEmailConfigured } from "@/lib/settings";
 import type { StoreSettings } from "@/generated/prisma/client";
 
 function Section({
@@ -27,12 +29,19 @@ export function SettingsForm({
   saved,
   passwordSaved,
   passwordError,
+  emailTest,
+  emailTestTo,
+  emailTestError,
 }: {
   settings: StoreSettings;
   saved?: boolean;
   passwordSaved?: boolean;
   passwordError?: string | null;
+  emailTest?: "ok" | "fail" | "invalid";
+  emailTestTo?: string;
+  emailTestError?: string;
 }) {
+  const emailReady = isEmailConfigured(settings);
   return (
     <div className="space-y-8">
       {saved && (
@@ -190,9 +199,24 @@ export function SettingsForm({
         </Section>
 
         <Section title="Email (Resend)">
+          <p className="text-xs text-muted-foreground">
+            1. Add your domain at{" "}
+            <a href="https://resend.com/domains" className="text-accent underline" target="_blank" rel="noreferrer">
+              resend.com/domains
+            </a>{" "}
+            and set DNS (SPF + DKIM). 2. Create an API key. 3. Use a from address on that domain (e.g.{" "}
+            <code className="text-xs">orders@justpeps.online</code>).
+          </p>
           <p>
             <Label htmlFor="emailFrom">From address</Label>
-            <Input id="emailFrom" name="emailFrom" type="email" defaultValue={settings.emailFrom} className="mt-1" />
+            <Input
+              id="emailFrom"
+              name="emailFrom"
+              type="email"
+              defaultValue={settings.emailFrom}
+              placeholder="orders@justpeps.online"
+              className="mt-1"
+            />
           </p>
           <p>
             <Label htmlFor="resendApiKey">Resend API key</Label>
@@ -200,13 +224,30 @@ export function SettingsForm({
               id="resendApiKey"
               name="resendApiKey"
               type="password"
-              placeholder={settings.resendApiKey ? "•••••••• (leave blank to keep)" : ""}
-              className="mt-1"
+              placeholder={settings.resendApiKey ? "•••••••• (leave blank to keep)" : "re_..."}
+              className="mt-1 font-mono text-sm"
             />
             <span className="mt-1 block text-xs text-zinc-500">
-              Without a key, emails are logged to the server console only.
+              {emailReady
+                ? "Configured — order confirmation emails send on checkout."
+                : "Without a key, emails are logged to the server console only."}
             </span>
           </p>
+          {emailTest === "ok" && (
+            <p className="rounded-md border border-green-200 bg-green-50 px-4 py-2 text-sm text-green-800">
+              Test email sent to {emailTestTo}.
+            </p>
+          )}
+          {emailTest === "invalid" && (
+            <p className="rounded-md border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700">
+              Enter a valid email address for the test.
+            </p>
+          )}
+          {emailTest === "fail" && (
+            <p className="rounded-md border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700">
+              Test failed: {emailTestError ?? "Unknown error"}
+            </p>
+          )}
         </Section>
 
         <Section title="Edge protection (Cloudflare-like)">
@@ -249,6 +290,21 @@ export function SettingsForm({
           Save all settings
         </Button>
       </form>
+
+      <Section title="Test email">
+        <p className="text-sm text-muted-foreground">
+          Save your Resend key and from address first, then send a test.
+        </p>
+        <form action={sendTestEmailAction} className="mt-4 flex max-w-md flex-col gap-3 sm:flex-row sm:items-end">
+          <p className="flex-1">
+            <Label htmlFor="testEmailTo">Send to</Label>
+            <Input id="testEmailTo" name="testEmailTo" type="email" required placeholder="you@example.com" className="mt-1" />
+          </p>
+          <Button type="submit" variant="outline" disabled={!emailReady}>
+            Send test
+          </Button>
+        </form>
+      </Section>
 
       <Section title="Admin password">
         {passwordSaved && (

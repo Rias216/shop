@@ -14,6 +14,7 @@
     "db:migrate-categories": "tsx prisma/migrate-legacy-categories.ts",
     "db:backfill-nowpayments": "tsx scripts/backfill-nowpayments.ts",
     "db:encrypt-settings": "tsx scripts/encrypt-store-settings-secrets.ts",
+    "email:test": "tsx scripts/test-resend-email.ts",
     "postinstall": "prisma generate"
   },
   "prisma": {

@@ -20,7 +20,7 @@ import {
   skuBaseFromName,
   slugFromName,
 } from "@/lib/product-identifiers";
-import { sendOrderShippedEmail } from "@/lib/email";
+import { sendOrderShippedEmail, sendTestEmail } from "@/lib/email";
 import { orderPublicUrl } from "@/lib/orders";
 import { DEFAULT_SETTINGS, getStoreSettings, SETTINGS_ID } from "@/lib/settings";
 import type { ProductCategory } from "@/generated/prisma/client";
@@ -430,12 +430,16 @@ export async function updateOrderStatusAction(formData: FormData) {
   });
 
   if (status === "SHIPPED") {
-    await sendOrderShippedEmail({
-      to: order.email,
-      orderId: order.id,
-      trackingNumber,
-      orderUrl: await orderPublicUrl(order.id, order.accessToken),
-    });
+    try {
+      await sendOrderShippedEmail({
+        to: order.email,
+        orderId: order.id,
+        trackingNumber,
+        orderUrl: await orderPublicUrl(order.id, order.accessToken),
+      });
+    } catch (error) {
+      console.error("[email] shipped notification failed:", error);
+    }
   }
 
   revalidatePath("/admin/orders");
@@ -491,6 +495,22 @@ export async function saveStoreSettingsAction(formData: FormData) {
   revalidatePath("/", "layout");
   revalidatePath("/admin/settings");
   redirect("/admin/settings?saved=1");
+}
+
+export async function sendTestEmailAction(formData: FormData) {
+  await requireAdmin();
+  const to = String(formData.get("testEmailTo") ?? "").trim();
+  if (!to || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to)) {
+    redirect("/admin/settings?emailTest=invalid");
+  }
+
+  try {
+    await sendTestEmail(to);
+    redirect(`/admin/settings?emailTest=ok&emailTo=${encodeURIComponent(to)}`);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Send failed";
+    redirect(`/admin/settings?emailTest=fail&emailError=${encodeURIComponent(message)}`);
+  }
 }
 
 export async function updateAdminPasswordAction(formData: FormData) {

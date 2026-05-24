@@ -2,8 +2,9 @@ import { db } from "./db";
 import { getStoreSettings } from "./settings";
 import { formatPrice } from "./utils";
 import {
-  sendOrderAwaitingPaymentEmail,
+  sendOrderConfirmationEmail,
   sendPaymentConfirmedEmail,
+  type OrderEmailSummary,
 } from "./email";
 
 export async function orderPublicUrl(
@@ -13,6 +14,34 @@ export async function orderPublicUrl(
 ): Promise<string> {
   const base = (siteUrl ?? (await getStoreSettings()).siteUrl).replace(/\/$/, "");
   return `${base}/order/${orderId}?token=${accessToken}`;
+}
+
+function shippingLabelFromAddress(shippingAddress: unknown): string | undefined {
+  if (!shippingAddress || typeof shippingAddress !== "object") return undefined;
+  const label = (shippingAddress as { shippingLabel?: unknown }).shippingLabel;
+  return typeof label === "string" ? label : undefined;
+}
+
+async function orderEmailSummary(orderId: string): Promise<OrderEmailSummary | null> {
+  const order = await db.order.findUnique({
+    where: { id: orderId },
+    include: { items: { include: { product: true } } },
+  });
+  if (!order) return null;
+
+  return {
+    orderId: order.id,
+    subtotalCents: order.subtotalCents,
+    shippingCents: order.shippingCents,
+    discountCents: order.discountCents,
+    totalCents: order.totalCents,
+    shippingLabel: shippingLabelFromAddress(order.shippingAddress),
+    lines: order.items.map((item) => ({
+      name: item.product.name,
+      qty: item.qty,
+      unitPriceCents: item.unitPriceCents,
+    })),
+  };
 }
 
 export async function markOrderPaid(orderId: string): Promise<void> {
@@ -37,14 +66,43 @@ export async function markOrderPaid(orderId: string): Promise<void> {
     );
   });
 
-  await sendPaymentConfirmedEmail({
-    to: order.email,
-    orderId: order.id,
-    totalFormatted: formatPrice(order.totalCents),
-    orderUrl: await orderPublicUrl(order.id, order.accessToken),
-  });
+  try {
+    await sendPaymentConfirmedEmail({
+      to: order.email,
+      orderId: order.id,
+      totalFormatted: formatPrice(order.totalCents),
+      orderUrl: await orderPublicUrl(order.id, order.accessToken),
+    });
+  } catch (error) {
+    console.error("[email] payment confirmed failed:", error);
+  }
 }
 
+export async function notifyOrderPlaced(params: {
+  orderId: string;
+  email: string;
+  accessToken: string;
+  paymentUrl: string;
+  paymentMethod: string;
+}): Promise<void> {
+  const summary = await orderEmailSummary(params.orderId);
+  if (!summary) return;
+
+  try {
+    await sendOrderConfirmationEmail({
+      to: params.email,
+      orderId: params.orderId,
+      paymentUrl: params.paymentUrl,
+      paymentMethod: params.paymentMethod,
+      orderUrl: await orderPublicUrl(params.orderId, params.accessToken),
+      summary,
+    });
+  } catch (error) {
+    console.error("[email] order confirmation failed:", error);
+  }
+}
+
+/** @deprecated use notifyOrderPlaced */
 export async function notifyAwaitingPayment(params: {
   orderId: string;
   email: string;
@@ -53,11 +111,5 @@ export async function notifyAwaitingPayment(params: {
   paymentUrl: string;
   paymentMethod: string;
 }): Promise<void> {
-  await sendOrderAwaitingPaymentEmail({
-    to: params.email,
-    orderId: params.orderId,
-    totalFormatted: formatPrice(params.totalCents),
-    paymentUrl: params.paymentUrl,
-    paymentMethod: params.paymentMethod,
-  });
+  await notifyOrderPlaced(params);
 }

@@ -8,10 +8,17 @@ export default async function AdminSettingsPage({
     saved?: string;
     passwordSaved?: string;
     passwordError?: string;
+    emailTest?: string;
+    emailTo?: string;
+    emailError?: string;
   }>;
 }) {
   const settings = await getStoreSettings();
   const params = await searchParams;
+  const emailTest =
+    params.emailTest === "ok" || params.emailTest === "fail" || params.emailTest === "invalid"
+      ? params.emailTest
+      : undefined;
 
   return (
     <article>
@@ -25,6 +32,9 @@ export default async function AdminSettingsPage({
           saved={params.saved === "1"}
           passwordSaved={params.passwordSaved === "1"}
           passwordError={params.passwordError ?? null}
+          emailTest={emailTest}
+          emailTestTo={params.emailTo}
+          emailTestError={params.emailError}
         />
       </div>
     </article>
