@@ -4,23 +4,9 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 const HOT_ROUTES = ["/catalog", "/cart", "/checkout", "/support"] as const;
-const PRELOAD_DELAY_MS = 800;
+/** After load — avoids competing with LCP / Speed Index / TBT on first paint. */
+const BATCH_PREFETCH_DELAY_MS = 2500;
 const prefetchedHrefs = new Set<string>();
-
-function scheduleIdle(callback: () => void, fallbackMs: number) {
-  if (typeof requestIdleCallback !== "undefined") {
-    return requestIdleCallback(callback, { timeout: fallbackMs });
-  }
-  return window.setTimeout(callback, fallbackMs);
-}
-
-function cancelIdle(id: number) {
-  if (typeof cancelIdleCallback !== "undefined") {
-    cancelIdleCallback(id);
-    return;
-  }
-  window.clearTimeout(id);
-}
 
 /**
  * Intent-friendly route prefetch for near-instant top-nav transitions without
@@ -38,11 +24,19 @@ export function InstantPrefetch() {
       router.prefetch(href);
     };
 
-    const idleId = scheduleIdle(() => {
-      for (const route of HOT_ROUTES) {
-        prefetchOnce(route);
-      }
-    }, PRELOAD_DELAY_MS);
+    let batchTimer: ReturnType<typeof setTimeout> | undefined;
+    const scheduleBatchPrefetch = () => {
+      batchTimer = window.setTimeout(() => {
+        for (const route of HOT_ROUTES) {
+          prefetchOnce(route);
+        }
+      }, BATCH_PREFETCH_DELAY_MS);
+    };
+    if (document.readyState === "complete") {
+      scheduleBatchPrefetch();
+    } else {
+      window.addEventListener("load", scheduleBatchPrefetch, { once: true });
+    }
 
     const onMouseOver = (event: MouseEvent) => {
       const target = event.target as HTMLElement | null;
@@ -57,7 +51,8 @@ export function InstantPrefetch() {
 
     document.addEventListener("mouseover", onMouseOver, { passive: true });
     return () => {
-      cancelIdle(idleId);
+      if (batchTimer !== undefined) window.clearTimeout(batchTimer);
+      window.removeEventListener("load", scheduleBatchPrefetch);
       document.removeEventListener("mouseover", onMouseOver);
     };
   }, [router]);

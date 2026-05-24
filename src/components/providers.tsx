@@ -2,7 +2,12 @@
 
 import { InstantPrefetch } from "@/components/instant-prefetch";
 import { PageScrollField } from "@/components/page-scroll-field";
-import { PerfDebugPanel } from "@/components/perf-debug-panel";
+import dynamic from "next/dynamic";
+
+const PerfDebugPanel = dynamic(
+  () => import("@/components/perf-debug-panel").then((m) => m.PerfDebugPanel),
+  { ssr: false },
+);
 import { applyResolvedTheme, getStoredThemeChoice, resolveTheme, subscribeThemeChanges } from "@/lib/theme-client";
 import { useEffect } from "react";
 
