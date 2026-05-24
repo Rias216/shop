@@ -33,10 +33,19 @@ export function getCoinIconUrl(code: string): string {
   return `https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons@master/128/color/${key}.png`;
 }
 
+/** Brand accent colors for fallback badges when CDN misses. */
+const COIN_ACCENT_COLORS: Record<string, string> = {
+  sol: "#9945FF",
+  solana: "#9945FF",
+};
+
 /** Stable accent for fallback badge when CDN misses. */
 export function coinAccentColor(code: string): string {
-  let h = 0;
   const key = normalizeCoinIconKey(code) || code;
+  const brand = COIN_ACCENT_COLORS[key];
+  if (brand) return brand;
+
+  let h = 0;
   for (let i = 0; i < key.length; i++) {
     h = (h * 31 + key.charCodeAt(i)) >>> 0;
   }
