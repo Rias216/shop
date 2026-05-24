@@ -33,7 +33,7 @@ export const DEFAULT_SETTINGS: Omit<StoreSettings, "updatedAt"> = {
   emailFrom: "orders@peptides.cafe",
 };
 
-function isMissingStoreSettingsTable(error: unknown): boolean {
+function isStoreSettingsUnavailable(error: unknown): boolean {
   if (!error || typeof error !== "object") return false;
   const maybeError = error as {
     code?: unknown;
@@ -41,10 +41,11 @@ function isMissingStoreSettingsTable(error: unknown): boolean {
       modelName?: unknown;
     };
   };
-  return (
-    maybeError.code === "P2021" &&
-    (maybeError.meta?.modelName === "StoreSettings" || maybeError.meta?.modelName == null)
-  );
+  if (maybeError.meta?.modelName !== "StoreSettings" && maybeError.meta?.modelName != null) {
+    return false;
+  }
+  // P2021: table missing. P2022: column missing (schema drift before db push).
+  return maybeError.code === "P2021" || maybeError.code === "P2022";
 }
 
 export const getStoreSettings = cache(async (): Promise<StoreSettings> => {
@@ -53,7 +54,7 @@ export const getStoreSettings = cache(async (): Promise<StoreSettings> => {
     row = await db.storeSettings.findUnique({ where: { id: SETTINGS_ID } });
   } catch (error) {
     // Keep storefront/admin pages functional while DB is being initialized.
-    if (!isMissingStoreSettingsTable(error)) throw error;
+    if (!isStoreSettingsUnavailable(error)) throw error;
   }
   if (row) {
     return {
