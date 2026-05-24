@@ -3,8 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
-/** Batch only the main shop route; cart/checkout load on link hover. */
-const BATCH_PREFETCH_ROUTES = ["/catalog"] as const;
+const HOT_ROUTES = ["/catalog", "/cart", "/checkout", "/support"] as const;
 /** After load — avoids competing with LCP / Speed Index / TBT on first paint. */
 const BATCH_PREFETCH_DELAY_MS = 2500;
 const prefetchedHrefs = new Set<string>();
@@ -28,7 +27,7 @@ export function InstantPrefetch() {
     let batchTimer: number | undefined;
     const scheduleBatchPrefetch = () => {
       batchTimer = window.setTimeout(() => {
-        for (const route of BATCH_PREFETCH_ROUTES) {
+        for (const route of HOT_ROUTES) {
           prefetchOnce(route);
         }
       }, BATCH_PREFETCH_DELAY_MS);

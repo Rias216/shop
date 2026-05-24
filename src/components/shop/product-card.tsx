@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { LazyAddToCartControls } from "@/components/shop/lazy-add-to-cart-controls";
+import { AddToCartControls } from "@/components/shop/add-to-cart-controls";
 import { CoaPurityButton } from "@/components/shop/coa-purity-button";
 import { ProductGraphic } from "@/components/shop/product-graphic";
 import { ProductStars } from "@/components/shop/product-stars";
@@ -96,7 +96,7 @@ export function ProductCard({
 
         <div className="product-card-foot-row product-card-foot-row--bottom">
           {showCart ? (
-            <LazyAddToCartControls productId={product.id} stock={product.stock} layout="inline" />
+            <AddToCartControls productId={product.id} stock={product.stock} layout="inline" />
           ) : product.stock > 0 ? (
             <p className="product-card-cart-note">{ORDER_QTY_MIN_NOTE}</p>
           ) : null}
