@@ -196,6 +196,20 @@ export function SettingsForm({
               className="mt-1 w-full rounded-xl border border-[var(--glass-border)] bg-[var(--glass-bg-subtle)] px-3 py-2 text-sm"
             />
           </p>
+          <p>
+            <Label htmlFor="manualPaymentEmail">Wire / bank contact email</Label>
+            <Input
+              id="manualPaymentEmail"
+              name="manualPaymentEmail"
+              type="email"
+              defaultValue={settings.manualPaymentEmail}
+              placeholder="payments@justpeps.online"
+              className="mt-1"
+            />
+            <span className="mt-1 block text-xs text-zinc-500">
+              Shown at checkout and on wire orders. Leave blank to auto-use payments@your-domain.
+            </span>
+          </p>
         </Section>
 
         <Section title="Email (Resend)">

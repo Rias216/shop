@@ -40,6 +40,7 @@ const checkoutSchema = z.object({
   couponCode: z.string().max(40).optional(),
   ageConfirmed: z.literal(true),
   termsAccepted: z.literal(true),
+  theme: z.enum(["light", "dark"]).optional().default("light"),
 });
 
 export async function POST(request: Request) {
@@ -180,6 +181,7 @@ export async function POST(request: Request) {
         couponCode: storedCouponCode,
         totalCents,
         status: "AWAITING_PAYMENT",
+        emailTheme: body.theme,
         items: {
           create: lines.map((l) => ({
             productId: l.productId,
@@ -207,6 +209,7 @@ export async function POST(request: Request) {
         accessToken: order.accessToken,
         paymentUrl: orderUrl,
         paymentMethod: "Bank transfer / wire",
+        theme: body.theme,
         }),
       );
     } else if (body.paymentMethod === "PAYPAL") {
@@ -232,6 +235,7 @@ export async function POST(request: Request) {
         accessToken: order.accessToken,
         paymentUrl: paypal.approvalUrl,
         paymentMethod: "PayPal",
+        theme: body.theme,
         }),
       );
     } else {
@@ -268,6 +272,7 @@ export async function POST(request: Request) {
         accessToken: order.accessToken,
         paymentUrl: invoice.invoiceUrl,
         paymentMethod: `${coinLabel} (NOWPayments)`,
+        theme: body.theme,
         }),
       );
     }

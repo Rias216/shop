@@ -13,6 +13,7 @@ import {
   type PrimaryCryptoPayCurrency,
 } from "@/lib/payments/crypto-currencies";
 import { getCryptoDisplay } from "@/lib/payments/crypto-display";
+import { getStoredThemeChoice, resolveTheme } from "@/lib/theme-client";
 import { formatPrice } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 
@@ -145,6 +146,7 @@ export function CheckoutForm({
           state: data.get("state"),
           postalCode: data.get("postalCode"),
           country: data.get("country"),
+          theme: resolveTheme(getStoredThemeChoice()),
           ...payment,
           ageConfirmed,
           termsAccepted,

@@ -1,11 +1,14 @@
 import { db } from "./db";
+import { getWirePaymentEmail } from "./payments/direct-contact";
 import { getStoreSettings } from "./settings";
 import { formatPrice } from "./utils";
 import {
   sendOrderConfirmationEmail,
   sendPaymentConfirmedEmail,
+  type EmailTheme,
   type OrderEmailSummary,
 } from "./email";
+import { normalizeEmailTheme } from "./email-template";
 
 export async function orderPublicUrl(
   orderId: string,
@@ -72,6 +75,7 @@ export async function markOrderPaid(orderId: string): Promise<void> {
       orderId: order.id,
       totalFormatted: formatPrice(order.totalCents),
       orderUrl: await orderPublicUrl(order.id, order.accessToken),
+      theme: normalizeEmailTheme(order.emailTheme),
     });
   } catch (error) {
     console.error("[email] payment confirmed failed:", error);
@@ -84,9 +88,13 @@ export async function notifyOrderPlaced(params: {
   accessToken: string;
   paymentUrl: string;
   paymentMethod: string;
+  theme?: EmailTheme;
 }): Promise<void> {
   const summary = await orderEmailSummary(params.orderId);
   if (!summary) return;
+
+  const settings = await getStoreSettings();
+  const theme = params.theme ?? "light";
 
   try {
     await sendOrderConfirmationEmail({
@@ -96,6 +104,8 @@ export async function notifyOrderPlaced(params: {
       paymentMethod: params.paymentMethod,
       orderUrl: await orderPublicUrl(params.orderId, params.accessToken),
       summary,
+      theme,
+      wireContactEmail: getWirePaymentEmail(settings),
     });
   } catch (error) {
     console.error("[email] order confirmation failed:", error);
@@ -110,6 +120,7 @@ export async function notifyAwaitingPayment(params: {
   accessToken: string;
   paymentUrl: string;
   paymentMethod: string;
+  theme?: EmailTheme;
 }): Promise<void> {
   await notifyOrderPlaced(params);
 }

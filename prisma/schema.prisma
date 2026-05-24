@@ -71,6 +71,7 @@ model StoreSettings {
   cryptoEnabled        Boolean  @default(false)
   manualPaymentEnabled Boolean  @default(true)
   manualPaymentInstructions String @default("We will email wire/ACH details after you place your order. Reference your order ID on payment.")
+  manualPaymentEmail   String   @default("")
   nowpaymentsApiKey    String   @default("")
   nowpaymentsIpnSecret String   @default("")
   resendApiKey         String   @default("")
@@ -164,6 +165,7 @@ model Order {
   paypalCaptureId String?
   paypalCapturedAt DateTime?
   accessToken     String        @unique @default(cuid())
+  emailTheme      String        @default("light")
   trackingNumber  String?
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
