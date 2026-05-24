@@ -1322,6 +1322,23 @@ h1, h2, h3 {
   }
 }
 
+@media (prefers-reduced-data: reduce) {
+  body::before {
+    filter: blur(48px) saturate(120%);
+    transform: translateZ(0);
+  }
+
+  .glass,
+  .glass-strong,
+  .glass-subtle,
+  .glass-nav,
+  .glass-hover,
+  .catalog-main,
+  .glass-nav {
+    backdrop-filter: blur(8px);
+  }
+}
+
 .text-balance {
   text-wrap: balance;
 }

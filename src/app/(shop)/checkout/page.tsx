@@ -1,15 +1,14 @@
 import Link from "next/link";
-import { CheckoutExperience } from "@/components/shop/checkout-experience";
-import { getSanitizedCart } from "@/lib/cart";
+import { CheckoutExperienceLoader } from "@/components/shop/checkout-experience-loader";
 import { getCouponCodeFromCookie } from "@/lib/coupon-cookie";
 import { getAppliedCouponFromCookie } from "@/lib/coupons";
 import { getDirectPaymentEmails } from "@/lib/payments/direct-contact";
-import { resolveCart } from "@/lib/resolve-cart";
+import { resolveCartFromCookie } from "@/lib/resolve-cart";
 import { getStoreSettings } from "@/lib/settings";
 
 export default async function CheckoutPage() {
-  const [items, settings] = await Promise.all([getSanitizedCart(), getStoreSettings()]);
-  const { lines, totalCents: subtotalCents, errors } = await resolveCart(items);
+  const [cart, settings] = await Promise.all([resolveCartFromCookie(), getStoreSettings()]);
+  const { lines, totalCents: subtotalCents, errors } = cart;
   const [initialCouponCode, initialAppliedCoupon] = await Promise.all([
     getCouponCodeFromCookie(),
     getAppliedCouponFromCookie(subtotalCents),
@@ -42,7 +41,7 @@ export default async function CheckoutPage() {
           </ul>
         </div>
       )}
-      <CheckoutExperience
+      <CheckoutExperienceLoader
         subtotalCents={subtotalCents}
         cryptoEnabled={settings.cryptoEnabled}
         directContactEmails={getDirectPaymentEmails(settings.emailFrom)}

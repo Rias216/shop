@@ -22,7 +22,7 @@ const nextConfig: NextConfig = {
       bodySizeLimit: "10mb",
     },
     staleTimes: {
-      dynamic: 30,
+      dynamic: 60,
       static: 300,
     },
   },

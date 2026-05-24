@@ -7,6 +7,21 @@ const HOT_ROUTES = ["/catalog", "/cart", "/checkout", "/support"] as const;
 const PRELOAD_DELAY_MS = 800;
 const prefetchedHrefs = new Set<string>();
 
+function scheduleIdle(callback: () => void, fallbackMs: number) {
+  if (typeof requestIdleCallback !== "undefined") {
+    return requestIdleCallback(callback, { timeout: fallbackMs });
+  }
+  return window.setTimeout(callback, fallbackMs);
+}
+
+function cancelIdle(id: number) {
+  if (typeof cancelIdleCallback !== "undefined") {
+    cancelIdleCallback(id);
+    return;
+  }
+  window.clearTimeout(id);
+}
+
 /**
  * Intent-friendly route prefetch for near-instant top-nav transitions without
  * globally enabling aggressive Link prefetch on every product card/list item.
@@ -23,7 +38,7 @@ export function InstantPrefetch() {
       router.prefetch(href);
     };
 
-    const id = window.setTimeout(() => {
+    const idleId = scheduleIdle(() => {
       for (const route of HOT_ROUTES) {
         prefetchOnce(route);
       }
@@ -42,7 +57,7 @@ export function InstantPrefetch() {
 
     document.addEventListener("mouseover", onMouseOver, { passive: true });
     return () => {
-      window.clearTimeout(id);
+      cancelIdle(idleId);
       document.removeEventListener("mouseover", onMouseOver);
     };
   }, [router]);

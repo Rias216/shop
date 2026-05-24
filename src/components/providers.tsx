@@ -2,6 +2,7 @@
 
 import { InstantPrefetch } from "@/components/instant-prefetch";
 import { PageScrollField } from "@/components/page-scroll-field";
+import { PerfDebugPanel } from "@/components/perf-debug-panel";
 import { applyResolvedTheme, getStoredThemeChoice, resolveTheme, subscribeThemeChanges } from "@/lib/theme-client";
 import { useEffect } from "react";
 
@@ -21,6 +22,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
     <>
       {perfEnabled ? <PageScrollField /> : null}
       <InstantPrefetch />
+      <PerfDebugPanel />
       {children}
     </>
   );

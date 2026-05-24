@@ -10,6 +10,8 @@ import {
   displayNameFromProduct,
   groupCatalogProducts,
 } from "@/lib/product-groups";
+import { createPagePerf } from "@/lib/perf";
+import { productDetailSelect } from "@/lib/product-include";
 import { getStoreSettings } from "@/lib/settings";
 import { getApprovedReviews, getProductRatingSummaries } from "@/lib/reviews";
 
@@ -18,33 +20,39 @@ export default async function ProductPage({
 }: {
   params: Promise<{ slug: string }>;
 }) {
+  const perf = createPagePerf("product");
   const { slug } = await params;
   const [settings, product] = await Promise.all([
     getStoreSettings(),
     db.product.findFirst({
       where: { slug, isActive: true },
-      include: { coaDocuments: { orderBy: { issuedAt: "desc" } } },
+      select: productDetailSelect,
     }),
   ]);
   if (!product) notFound();
 
-  const variants = product.groupKey
-    ? await getProductVariantsByGroupKey(product.groupKey)
-    : [
+  const variantsPromise = product.groupKey
+    ? getProductVariantsByGroupKey(product.groupKey)
+    : Promise.resolve([
         {
           ...product,
           coaDocuments: product.coaDocuments,
         },
-      ];
+      ]);
+
+  const [variants, approvedReviews] = await Promise.all([
+    perf.time("db.variants", () => variantsPromise),
+    perf.time("db.reviews", () => getApprovedReviews(product.id)),
+  ]);
 
   const group = groupCatalogProducts(variants)[0]!;
-  const [ratingSummaries, approvedReviews] = await Promise.all([
+  const ratingSummaries = await perf.time("db.ratings", () =>
     getProductRatingSummaries(variants.map((v) => v.id)),
-    getApprovedReviews(product.id),
-  ]);
+  );
   const ratingSummary = aggregateRatingForGroup(group, ratingSummaries);
 
   const graphicName = displayNameFromProduct(product);
+  perf.flush({ variants: variants.length, reviews: approvedReviews.length });
 
   return (
     <article className="mx-auto max-w-6xl px-4 py-12">

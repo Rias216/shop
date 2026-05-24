@@ -7,13 +7,15 @@ import {
   type ProductGroup,
   type ProductWithCoa,
 } from "@/lib/product-groups";
-import { PRODUCT_CACHE_TAGS, productListInclude as productInclude } from "@/lib/product-include";
+import { PRODUCT_CACHE_TAGS, productListSelect } from "@/lib/product-include";
 import { getProductRatingSummaries } from "@/lib/reviews";
 
-async function fetchPopularRank(): Promise<Map<string, number>> {
+async function fetchPopularRank(productIds: string[]): Promise<Map<string, number>> {
+  if (productIds.length === 0) return new Map();
   const rows = await db.orderItem.groupBy({
     by: ["productId"],
     where: {
+      productId: { in: productIds },
       order: {
         status: { in: [OrderStatus.PAID, OrderStatus.SHIPPED] },
       },
@@ -42,41 +44,41 @@ async function productsByReviewFallback(limit: number): Promise<ProductWithCoa[]
       where: { isActive: true },
       orderBy: { createdAt: "desc" },
       take: limit * 3,
-      include: productInclude,
-    });
+      select: productListSelect,
+    }) as Promise<ProductWithCoa[]>;
   }
 
   const ids = top.map((a) => a.productId);
   const products = await db.product.findMany({
     where: { id: { in: ids }, isActive: true },
-    include: productInclude,
+    select: productListSelect,
   });
   const byId = new Map(products.map((p) => [p.id, p]));
   return ids.map((id) => byId.get(id)).filter(Boolean) as ProductWithCoa[];
 }
 
 async function computePopularProductGroups(limit: number): Promise<ProductGroup[]> {
-  const popularRank = await fetchPopularRank();
+  const candidateProducts = await db.product.findMany({
+    where: { isActive: true },
+    select: productListSelect,
+    take: limit * 8,
+  });
+  const products = candidateProducts as ProductWithCoa[];
+  const productIds = products.map((p) => p.id);
+  const popularRank = await fetchPopularRank(productIds);
 
-  let products: ProductWithCoa[];
+  let rankedProducts: ProductWithCoa[];
   if (popularRank.size > 0) {
-    const rankedIds = [...popularRank.entries()]
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, limit * 4)
-      .map(([id]) => id);
-    const rows = await db.product.findMany({
-      where: { id: { in: rankedIds }, isActive: true },
-      include: productInclude,
-    });
-    const byId = new Map(rows.map((p) => [p.id, p]));
-    products = rankedIds.map((id) => byId.get(id)).filter(Boolean) as ProductWithCoa[];
+    rankedProducts = [...products]
+      .sort((a, b) => (popularRank.get(b.id) ?? 0) - (popularRank.get(a.id) ?? 0))
+      .slice(0, limit * 4);
   } else {
-    products = await productsByReviewFallback(limit);
+    rankedProducts = await productsByReviewFallback(limit);
   }
 
-  const groups = groupCatalogProducts(products);
+  const groups = groupCatalogProducts(rankedProducts);
   const ratingByProductId = await getProductRatingSummaries(
-    products.map((p) => p.id),
+    rankedProducts.map((p) => p.id),
   );
   const sorted = sortProductGroups(groups, "popular", {
     popularRank,
@@ -86,12 +88,12 @@ async function computePopularProductGroups(limit: number): Promise<ProductGroup[
 }
 
 async function computeNewArrivalGroups(limit: number): Promise<ProductGroup[]> {
-  const products = await db.product.findMany({
+  const products = (await db.product.findMany({
     where: { isActive: true },
     orderBy: { createdAt: "desc" },
     take: limit * 4,
-    include: productInclude,
-  });
+    select: productListSelect,
+  })) as ProductWithCoa[];
   const groups = groupCatalogProducts(products);
   const ratingByProductId = await getProductRatingSummaries(products.map((p) => p.id));
   const sorted = sortProductGroups(groups, "new", {

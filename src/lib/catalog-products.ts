@@ -11,7 +11,9 @@ import {
 import { getProductRatingSummaries } from "@/lib/reviews";
 import { db } from "@/lib/db";
 import { unstable_cache } from "next/cache";
-import { PRODUCT_CACHE_TAGS, productListInclude } from "@/lib/product-include";
+import { PRODUCT_CACHE_TAGS, productDetailSelect, productListSelect } from "@/lib/product-include";
+import { cache } from "react";
+import { createPagePerf } from "@/lib/perf";
 import type { ProductRatingSummary } from "@/lib/reviews";
 
 function orderByForSort(sort: ReturnType<typeof parseCatalogSort>) {
@@ -50,8 +52,8 @@ export async function getCatalogProducts(params: CatalogSearchParams) {
   return db.product.findMany({
     where: buildCatalogWhere(params),
     orderBy: orderByForSort(sort),
-    include: productListInclude,
-  });
+    select: productListSelect,
+  }) as Promise<ProductWithCoa[]>;
 }
 
 type CatalogGroupsPayload = {
@@ -97,13 +99,16 @@ export async function getCatalogProductGroupsCachedByParams(params: CatalogSearc
 export async function getCatalogProductGroups(
   params: CatalogSearchParams,
 ): Promise<{ groups: ProductGroup[]; ratingByProductId: Map<string, { average: number | null; count: number }> }> {
-  const products = await getCatalogProducts(params);
+  const perf = createPagePerf("catalog.groups");
+  const products = await perf.time("db.products", () => getCatalogProducts(params));
   const sort = parseCatalogSort(params.sort);
   const groups = groupCatalogProducts(products);
   const productIds = products.map((p) => p.id);
-  const ratingByProductId = await getProductRatingSummaries(productIds);
+  const ratingByProductId = await perf.time("db.ratings", () =>
+    getProductRatingSummaries(productIds),
+  );
   const popularRank = needsPopularRank(sort)
-    ? await fetchPopularRank(productIds)
+    ? await perf.time("db.popular", () => fetchPopularRank(productIds))
     : new Map<string, number>();
 
   if (needsReviewAggregation(sort)) {
@@ -122,10 +127,12 @@ export async function getCatalogProductGroups(
     }
   }
 
-  return {
+  const result = {
     groups: sortProductGroups(groups, sort, { popularRank, ratingByProductId }),
     ratingByProductId,
   };
+  perf.flush({ groups: result.groups.length, products: products.length });
+  return result;
 }
 
 const getCatalogProductCountCached = unstable_cache(
@@ -143,23 +150,12 @@ export async function getCatalogProductCount(params: CatalogSearchParams) {
   return getCatalogProductCountCached(category, q);
 }
 
-export async function getProductVariantsByGroupKey(
+export const getProductVariantsByGroupKey = cache(async function getProductVariantsByGroupKey(
   groupKey: string,
 ): Promise<ProductWithCoa[]> {
   const rows = await db.product.findMany({
     where: { groupKey, isActive: true },
-    include: {
-      coaDocuments: {
-        orderBy: { issuedAt: "desc" },
-        select: {
-          id: true,
-          fileUrl: true,
-          batchCode: true,
-          issuedAt: true,
-          labName: true,
-        },
-      },
-    },
+    select: productDetailSelect,
   });
-  return rows.sort((a, b) => parseStrengthMg(a) - parseStrengthMg(b));
-}
+  return (rows as ProductWithCoa[]).sort((a, b) => parseStrengthMg(a) - parseStrengthMg(b));
+});

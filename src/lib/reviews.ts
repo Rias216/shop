@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { ReviewStatus } from "@/generated/prisma/client";
 import { db } from "@/lib/db";
 
@@ -15,7 +16,7 @@ export async function getProductRatingSummary(
   return map.get(productId) ?? emptySummary();
 }
 
-export async function getProductRatingSummaries(
+export const getProductRatingSummaries = cache(async function getProductRatingSummaries(
   productIds: string[],
 ): Promise<Map<string, ProductRatingSummary>> {
   const result = new Map<string, ProductRatingSummary>();
@@ -41,7 +42,7 @@ export async function getProductRatingSummaries(
   }
 
   return result;
-}
+});
 
 export async function getVerifiedReviewerEmails(productId: string): Promise<Set<string>> {
   const rows = await db.orderItem.findMany({
@@ -64,7 +65,9 @@ export type ApprovedReview = {
   verifiedPurchase: boolean;
 };
 
-export async function getApprovedReviews(productId: string): Promise<ApprovedReview[]> {
+export const getApprovedReviews = cache(async function getApprovedReviews(
+  productId: string,
+): Promise<ApprovedReview[]> {
   const [reviews, verifiedEmails] = await Promise.all([
     db.review.findMany({
       where: { productId, status: ReviewStatus.APPROVED },
@@ -93,7 +96,7 @@ export async function getApprovedReviews(productId: string): Promise<ApprovedRev
       r.authorEmail && verifiedEmails.has(r.authorEmail.toLowerCase()),
     ),
   }));
-}
+});
 
 export async function getPendingReviewCount() {
   return db.review.count({ where: { status: ReviewStatus.PENDING } });

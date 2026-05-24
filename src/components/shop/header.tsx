@@ -32,7 +32,7 @@ export async function ShopHeader() {
           <Link href="/support" prefetch className={navLink}>
             Support
           </Link>
-          <Link href="/admin" prefetch className={navLink}>
+          <Link href="/admin" prefetch={false} className={navLink}>
             Admin
           </Link>
           <ThemeToggle className="mx-1" />

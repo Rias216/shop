@@ -1,5 +1,5 @@
 import { ProductStars } from "@/components/shop/product-stars";
-import { ReviewForm } from "@/components/shop/review-form";
+import { ReviewFormLoader } from "@/components/shop/review-form-loader";
 import type { ProductRatingSummary } from "@/lib/reviews";
 
 import type { ApprovedReview } from "@/lib/reviews";
@@ -65,7 +65,7 @@ export function ProductReviews({
           Reviews are moderated before they appear. Use the same email as your order to earn a
           verified purchase badge.
         </p>
-        <ReviewForm productId={productId} />
+        <ReviewFormLoader productId={productId} />
       </div>
     </section>
   );

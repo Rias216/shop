@@ -3,18 +3,16 @@ import { Button } from "@/components/ui/button";
 import { CartQtyStepper } from "@/components/shop/cart-qty-stepper";
 import { PaperCupIcon } from "@/components/shop/paper-cup-icon";
 import { ProductGraphic } from "@/components/shop/product-graphic";
-import { getSanitizedCart } from "@/lib/cart";
 import { getCouponCodeFromCookie } from "@/lib/coupon-cookie";
 import { getAppliedCouponFromCookie } from "@/lib/coupons";
-import { resolveCart } from "@/lib/resolve-cart";
+import { resolveCartFromCookie } from "@/lib/resolve-cart";
 import { OrderSummaryPanel } from "@/components/shop/order-summary-panel";
 import { formatBlockPrice, formatPerVialPrice } from "@/lib/pricing";
 import { quoteOrder } from "@/lib/shipping";
 import { formatPrice } from "@/lib/utils";
 
 export default async function CartPage() {
-  const items = await getSanitizedCart();
-  const { lines, totalCents: subtotalCents, errors } = await resolveCart(items);
+  const { lines, totalCents: subtotalCents, errors } = await resolveCartFromCookie();
   const [initialCouponCode, initialAppliedCoupon] = await Promise.all([
     getCouponCodeFromCookie(),
     getAppliedCouponFromCookie(subtotalCents),
