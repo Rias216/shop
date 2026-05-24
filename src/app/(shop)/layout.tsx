@@ -16,6 +16,8 @@ export default async function ShopLayout({
       <ShopHeader />
       <main className="shop-main-enter relative z-10 flex-1">{children}</main>
       <ShopFooter
+        siteName={settings.siteName}
+        siteUrl={settings.siteUrl}
         legalEntity={settings.legalEntity}
         disclaimer={settings.researchDisclaimer}
       />

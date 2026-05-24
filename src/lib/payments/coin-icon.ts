@@ -27,6 +27,11 @@ export function normalizeCoinIconKey(code: string): string {
   return raw;
 }
 
+export function isSolanaCoinKey(code: string): boolean {
+  const key = normalizeCoinIconKey(code);
+  return key === "sol" || key === "solana";
+}
+
 /** Official logos from spothq/cryptocurrency-icons (SVG/PNG pack). */
 export function getCoinIconUrl(code: string): string {
   const key = normalizeCoinIconKey(code);
@@ -35,8 +40,8 @@ export function getCoinIconUrl(code: string): string {
 
 /** Brand accent colors for fallback badges when CDN misses. */
 const COIN_ACCENT_COLORS: Record<string, string> = {
-  sol: "#9333ea",
-  solana: "#9333ea",
+  sol: "#9945FF",
+  solana: "#9945FF",
 };
 
 /** Stable accent for fallback badge when CDN misses. */

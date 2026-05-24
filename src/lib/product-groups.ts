@@ -29,7 +29,7 @@ export function parseStrengthMg(variant: ProductWithCoa): number {
   return 0;
 }
 
-export function displayNameFromProduct(product: ProductWithCoa): string {
+export function displayNameFromProduct(product: Pick<Product, "name">): string {
   const stripped = product.name
     .replace(/\s+\d+(?:\.\d+)?\s*mg\b/gi, "")
     .replace(/\s{2,}/g, " ")

@@ -6,6 +6,7 @@ import { ProductStars } from "@/components/shop/product-stars";
 import type { ProductRatingSummary } from "@/lib/reviews";
 import { formatPurityLabel } from "@/lib/coa";
 import { ORDER_QTY_MIN_NOTE, canOrderProduct } from "@/lib/order-qty";
+import { displayNameFromProduct } from "@/lib/product-groups";
 import { ProductPrice } from "@/components/shop/product-price";
 import type { Product, CoaDocument } from "@/generated/prisma/client";
 import { cn } from "@/lib/utils";
@@ -26,6 +27,7 @@ export function ProductCard({
   className?: string;
 }) {
   const purityLabel = product.purity ? formatPurityLabel(product.purity) : null;
+  const cardTitle = displayNameFromProduct(product);
   const productHref = `/products/${product.slug}`;
   const showCart = canOrderProduct(product.stock);
 
@@ -38,10 +40,11 @@ export function ProductCard({
       >
         <ProductGraphic
           slug={product.slug}
-          name={product.name}
+          name={cardTitle}
           sku={product.sku}
           category={product.category}
           variantLabel={product.variantLabel}
+          preferCategorySubtitle
           size="md"
           className="w-full shrink-0"
         />
@@ -53,7 +56,7 @@ export function ProductCard({
           prefetch={false}
           className="product-card-title outline-none hover:text-accent focus-visible:underline"
         >
-          <h3>{product.name}</h3>
+          <h3>{cardTitle}</h3>
         </Link>
 
         <div className="product-card-stars">

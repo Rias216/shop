@@ -4,8 +4,8 @@ import { WebVitals } from "@/components/web-vitals";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Peptides",
-  description: "Research peptides from peptides.cafe — in-vitro laboratory use only.",
+  title: "Just Peps",
+  description: "Research peptides from Just Peps — in-vitro laboratory use only.",
 };
 
 export default function RootLayout({
@@ -14,14 +14,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="h-full antialiased light" suppressHydrationWarning>
-      <head>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem('theme');var theme=t==='dark'?'dark':'light';document.documentElement.classList.remove('light','dark');document.documentElement.classList.add(theme);document.documentElement.style.colorScheme=theme;}catch(e){document.documentElement.classList.add('light');}})();`,
-          }}
-        />
-      </head>
+    <html lang="en" className="h-full antialiased" suppressHydrationWarning>
       <body className="min-h-full flex flex-col font-sans text-foreground">
         <WebVitals />
         <Providers>{children}</Providers>

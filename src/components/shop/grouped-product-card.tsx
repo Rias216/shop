@@ -66,6 +66,7 @@ function GroupedProductCardMulti({ group, ratingSummary, className }: Props) {
           sku={graphicProduct.sku}
           category={group.category}
           variantLabel={selected.variantLabel}
+          preferCategorySubtitle
           size="md"
           className="w-full shrink-0"
         />

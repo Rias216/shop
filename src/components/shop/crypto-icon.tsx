@@ -1,7 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { coinAccentColor, getCoinIconUrl, normalizeCoinIconKey } from "@/lib/payments/coin-icon";
+import {
+  coinAccentColor,
+  getCoinIconUrl,
+  isSolanaCoinKey,
+  normalizeCoinIconKey,
+} from "@/lib/payments/coin-icon";
 import { cn } from "@/lib/utils";
 
 /** PayPal only — checkout crypto uses official CDN logos. */
@@ -26,6 +31,20 @@ function ColoredTickerIcon({ code, className }: { code: string; className?: stri
   );
 }
 
+/** Solana brand purple (#9945FF) — CDN pack uses a different palette. */
+function SolanaCoinIcon({ className }: { className?: string }) {
+  const base = cn("h-6 w-6 shrink-0", className);
+  return (
+    <svg viewBox="0 0 32 32" className={base} aria-hidden>
+      <circle cx="16" cy="16" r="16" fill="#9945FF" />
+      <path
+        fill="#fff"
+        d="M10.2 20.8 14.5 11.2h3.1l-4.3 9.6h-3.1zm5.2 0 4.3-9.6h3.1l-4.3 9.6h-3.1zm5.2 0 4.3-9.6H28l-4.3 9.6h-3.3z"
+      />
+    </svg>
+  );
+}
+
 /**
  * Official logos via spothq/cryptocurrency-icons (community-maintained from project brands).
  * @see https://github.com/spothq/cryptocurrency-icons
@@ -33,6 +52,10 @@ function ColoredTickerIcon({ code, className }: { code: string; className?: stri
 function OfficialCoinIcon({ code, className }: { code: string; className?: string }) {
   const key = normalizeCoinIconKey(code);
   const [failed, setFailed] = useState(false);
+
+  if (isSolanaCoinKey(code)) {
+    return <SolanaCoinIcon className={className} />;
+  }
 
   if (!key || failed) {
     return <ColoredTickerIcon code={code} className={className} />;

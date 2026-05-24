@@ -29,6 +29,8 @@ type Props = {
   category: ProductCategory;
   size?: keyof typeof sizeClasses;
   variantLabel?: string | null;
+  /** Catalog cards: show category label instead of mg strength. */
+  preferCategorySubtitle?: boolean;
   className?: string;
 };
 
@@ -39,11 +41,14 @@ export function ProductGraphic({
   category,
   size = "md",
   variantLabel,
+  preferCategorySubtitle = false,
   className,
 }: Props) {
   const palette = getProductPalette(category, slug);
   const displayCode = getDisplayCode({ name, sku });
-  const strengthLabel = getStrengthLabel(name, variantLabel);
+  const strengthLabel = preferCategorySubtitle
+    ? null
+    : getStrengthLabel(name, variantLabel);
   const categoryLabel = getCategoryLabel(category);
   const categoryColor = getCategoryTextColor(category);
   const compact = size === "xs" || size === "sm";

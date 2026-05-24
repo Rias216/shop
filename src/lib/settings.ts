@@ -7,8 +7,8 @@ export const SETTINGS_ID = "default";
 
 export const DEFAULT_SETTINGS: Omit<StoreSettings, "updatedAt"> = {
   id: SETTINGS_ID,
-  siteName: "Peptides",
-  legalEntity: "Peptides Cafe",
+  siteName: "Just Peps",
+  legalEntity: "Just Peps",
   siteUrl: "https://peptides.cafe",
   researchDisclaimer:
     "For laboratory and research use only. Not for human or veterinary consumption. Buyer assumes full responsibility for compliance with local laws.",
@@ -23,7 +23,6 @@ export const DEFAULT_SETTINGS: Omit<StoreSettings, "updatedAt"> = {
   manualPaymentEnabled: true,
   manualPaymentInstructions:
     "We will email wire/ACH details after you place your order. Reference your order ID on payment.",
-  manualPaymentEmail: "",
   nowpaymentsApiKey: "",
   nowpaymentsIpnSecret: "",
   resendApiKey: "",
