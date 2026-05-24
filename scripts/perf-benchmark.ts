@@ -70,11 +70,39 @@ function p95(nums: number[]): number {
   return sorted[idx]!;
 }
 
+async function assertServerReachable(): Promise<void> {
+  const url = `${BASE_URL}/`;
+  try {
+    const res = await fetch(url, {
+      headers: { Accept: "text/html" },
+      redirect: "follow",
+      signal: AbortSignal.timeout(10_000),
+    });
+    if (res.status >= 500) {
+      console.error(`Server at ${BASE_URL} returned ${res.status}. Fix errors before benchmarking.`);
+      process.exitCode = 1;
+      return;
+    }
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error(`Cannot reach ${BASE_URL}\n`);
+    console.error(`  ${msg}\n`);
+    console.error("Start the app first, then re-run:\n");
+    console.error("  npm run dev");
+    console.error("  npm run perf:bench -- --save-baseline\n");
+    console.error("Or benchmark production/staging:\n");
+    console.error('  $env:BASE_URL="https://justpeps.online"; npm run perf:bench -- --save-baseline');
+    process.exitCode = 1;
+    throw err;
+  }
+}
+
 async function fetchSample(url: string): Promise<Sample> {
   const start = performance.now();
   const res = await fetch(url, {
     headers: { Accept: "text/html" },
     redirect: "follow",
+    signal: AbortSignal.timeout(60_000),
   });
   const body = await res.arrayBuffer();
   const totalMs = performance.now() - start;
@@ -177,6 +205,9 @@ async function main() {
   const paths = parsePaths();
   await mkdir(PERF_DIR, { recursive: true });
 
+  console.log(`Target: ${BASE_URL}`);
+  await assertServerReachable();
+
   console.log("Warming up...");
   await fetchSample(`${BASE_URL}/`);
 
@@ -218,7 +249,6 @@ async function main() {
   console.log(`Wrote ${latestPath}`);
 }
 
-main().catch((err) => {
-  console.error(err);
-  process.exitCode = 1;
+main().catch(() => {
+  process.exit(process.exitCode || 1);
 });
