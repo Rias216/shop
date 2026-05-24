@@ -25,14 +25,65 @@ function createClient(): { db: PrismaClient; cleanup: () => Promise<void> } {
   };
 }
 
+async function columnExistsSqlite(db: PrismaClient, table: string, column: string): Promise<boolean> {
+  const rows = await db.$queryRawUnsafe<Array<{ name: string }>>(
+    `PRAGMA table_info("${table}")`,
+  );
+  return rows.some((row) => row.name === column);
+}
+
+async function columnExistsPostgres(
+  db: PrismaClient,
+  table: string,
+  column: string,
+): Promise<boolean> {
+  const rows = await db.$queryRawUnsafe<Array<{ column_name: string }>>(
+    `SELECT column_name FROM information_schema.columns WHERE table_name = $1 AND column_name = $2`,
+    table,
+    column,
+  );
+  return rows.length > 0;
+}
+
+async function renameEmailToUsername(db: PrismaClient, isSqlite: boolean) {
+  const hasUsername = isSqlite
+    ? await columnExistsSqlite(db, "AdminUser", "username")
+    : await columnExistsPostgres(db, "AdminUser", "username");
+
+  if (hasUsername) {
+    console.log("AdminUser.username already exists — skipped.");
+    return;
+  }
+
+  const hasEmail = isSqlite
+    ? await columnExistsSqlite(db, "AdminUser", "email")
+    : await columnExistsPostgres(db, "AdminUser", "email");
+
+  if (!hasEmail) {
+    console.log("AdminUser.email not found — skipped.");
+    return;
+  }
+
+  await db.$executeRawUnsafe(
+    `ALTER TABLE "AdminUser" RENAME COLUMN "email" TO "username"`,
+  );
+  console.log("Renamed AdminUser.email -> username");
+}
+
 async function main() {
+  const url = process.env.DATABASE_URL ?? "file:./dev.db";
+  const isSqlite = url.startsWith("file:");
   const { db, cleanup } = createClient();
+
   try {
-    await db.$executeRawUnsafe(`ALTER TABLE AdminUser RENAME COLUMN email TO username`);
-    console.log("Renamed AdminUser.email -> username");
+    await renameEmailToUsername(db, isSqlite);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    if (/no such column|duplicate column|already exists/i.test(message)) {
+    if (
+      /no such column|duplicate column|already exists|relation .* does not exist|does not exist/i.test(
+        message,
+      )
+    ) {
       console.log("AdminUser.username migration skipped:", message);
       return;
     }

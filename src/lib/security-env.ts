@@ -10,10 +10,23 @@ const WEAK_SECRET_VALUES = new Set([
   "password",
 ]);
 
+const WEAK_ADMIN_PASSWORD_VALUES = new Set([
+  "",
+  "admin123",
+  "password",
+  "changeme",
+]);
+
 function isWeakSecret(value: string | undefined): boolean {
   const normalized = (value ?? "").trim().toLowerCase();
   if (WEAK_SECRET_VALUES.has(normalized)) return true;
   return normalized.length < 32;
+}
+
+export function isWeakAdminPassword(value: string | undefined): boolean {
+  const normalized = (value ?? "").trim().toLowerCase();
+  if (WEAK_ADMIN_PASSWORD_VALUES.has(normalized)) return true;
+  return normalized.length < 12;
 }
 
 let validated = false;
@@ -30,6 +43,12 @@ export function enforceSecurityEnv(): void {
   if (isWeakSecret(authSecret)) {
     throw new Error(
       "Insecure AUTH_SECRET/NEXTAUTH_SECRET in production. Use a strong random secret (>=32 chars).",
+    );
+  }
+
+  if (isWeakAdminPassword(process.env.ADMIN_PASSWORD)) {
+    throw new Error(
+      "Insecure ADMIN_PASSWORD in production. Set a strong password (>=12 chars, not default).",
     );
   }
 }
