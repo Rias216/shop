@@ -46,7 +46,7 @@ export default async function AdminLoginPage({
               type="text"
               required
               autoComplete="username"
-              placeholder="admin@example.com"
+              placeholder="admin"
               className="mt-1"
             />
           </p>

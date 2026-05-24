@@ -5,7 +5,7 @@ export const ADMIN_SESSION_MAX_AGE_SEC = 60 * 60 * 8;
 
 export type AdminSession = {
   id: string;
-  email: string;
+  username: string;
 };
 
 function sessionSecret(): Uint8Array {
@@ -17,7 +17,7 @@ function sessionSecret(): Uint8Array {
 }
 
 export async function signAdminSession(admin: AdminSession): Promise<string> {
-  return new SignJWT({ email: admin.email })
+  return new SignJWT({ username: admin.username })
     .setProtectedHeader({ alg: "HS256" })
     .setSubject(admin.id)
     .setIssuedAt()
@@ -29,9 +29,9 @@ export async function verifyAdminSessionToken(token: string): Promise<AdminSessi
   try {
     const { payload } = await jwtVerify(token, sessionSecret());
     const id = payload.sub;
-    const email = payload.email;
-    if (typeof id !== "string" || typeof email !== "string") return null;
-    return { id, email };
+    const username = payload.username;
+    if (typeof id !== "string" || typeof username !== "string") return null;
+    return { id, username };
   } catch {
     return null;
   }

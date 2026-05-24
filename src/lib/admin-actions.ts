@@ -496,7 +496,7 @@ export async function saveStoreSettingsAction(formData: FormData) {
 export async function updateAdminPasswordAction(formData: FormData) {
   await requireAdmin();
   const session = await getAdminSession();
-  if (!session?.email) redirect("/admin/settings?passwordError=invalid");
+  if (!session?.username) redirect("/admin/settings?passwordError=invalid");
 
   const currentPassword = String(formData.get("currentPassword") ?? "");
   const newPassword = String(formData.get("newPassword") ?? "");
@@ -510,7 +510,7 @@ export async function updateAdminPasswordAction(formData: FormData) {
   }
 
   const admin = await db.adminUser.findUnique({
-    where: { email: session.email },
+    where: { username: session.username },
   });
   if (!admin) redirect("/admin/settings?passwordError=invalid");
 

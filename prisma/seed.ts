@@ -101,14 +101,14 @@ async function main() {
 
   await migrateLegacyCategories(db);
 
-  const email = process.env.ADMIN_EMAIL ?? "admin@example.com";
+  const username = process.env.ADMIN_USERNAME ?? "admin";
   const password = process.env.ADMIN_PASSWORD ?? "admin123";
   const passwordHash = await hash(password, 12);
 
   await db.adminUser.upsert({
-    where: { email },
+    where: { username },
     update: { passwordHash },
-    create: { email, passwordHash },
+    create: { username, passwordHash },
   });
 
   const siteName = process.env.NEXT_PUBLIC_SITE_NAME ?? DEFAULT_SETTINGS.siteName;
@@ -238,7 +238,7 @@ async function main() {
   }
 
   await cleanup();
-  console.log("Seed complete. Admin:", email);
+  console.log("Seed complete. Admin login:", username);
 }
 
 main().catch((e) => {

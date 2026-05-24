@@ -16,7 +16,7 @@ function safeCallbackUrl(raw: string | null): string {
 
 export async function adminLoginAction(formData: FormData) {
   enforceSecurityEnv();
-  const login = String(formData.get("login") ?? "").trim().toLowerCase();
+  const login = String(formData.get("login") ?? "").trim();
   const password = String(formData.get("password") ?? "");
   const callbackUrl = safeCallbackUrl(String(formData.get("callbackUrl") ?? ""));
 
@@ -34,12 +34,12 @@ export async function adminLoginAction(formData: FormData) {
     redirect(`/admin/login?error=rate&callbackUrl=${encodeURIComponent(callbackUrl)}`);
   }
 
-  const admin = await db.adminUser.findUnique({ where: { email: login } });
+  const admin = await db.adminUser.findUnique({ where: { username: login } });
   if (!admin || !(await compare(password, admin.passwordHash))) {
     redirect(`/admin/login?error=invalid&callbackUrl=${encodeURIComponent(callbackUrl)}`);
   }
 
-  await setAdminSession({ id: admin.id, email: admin.email });
+  await setAdminSession({ id: admin.id, username: admin.username });
   redirect(callbackUrl);
 }
 
