@@ -23,13 +23,13 @@ export async function ShopHeader() {
           <BrandMark />
         </Link>
         <nav className="flex flex-wrap items-center gap-1 text-sm">
-          <Link href="/" prefetch className={navLink}>
+          <Link href="/" prefetch={false} className={navLink}>
             Home
           </Link>
           <Link href={catalogHref({})} prefetch className={navLink}>
             Shop
           </Link>
-          <Link href="/support" prefetch className={navLink}>
+          <Link href="/support" prefetch={false} className={navLink}>
             Support
           </Link>
           <Link href="/admin" prefetch={false} className={navLink}>
@@ -38,7 +38,7 @@ export async function ShopHeader() {
           <ThemeToggle className="mx-1" />
           <Link
             href="/cart"
-            prefetch
+            prefetch={false}
             className={cn(
               navLink,
               "btn-glass btn-glass-accent pressable-bouncy font-medium",

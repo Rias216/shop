@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { AddToCartControls } from "@/components/shop/add-to-cart-controls";
+import { LazyAddToCartControls } from "@/components/shop/lazy-add-to-cart-controls";
 import { CoaPurityButton } from "@/components/shop/coa-purity-button";
 import { ProductGraphic } from "@/components/shop/product-graphic";
 import { ProductPrice } from "@/components/shop/product-price";
@@ -119,7 +119,7 @@ export function GroupedProductCardMulti({ group, ratingSummary, className }: Pro
 
         <div className="product-card-foot-row product-card-foot-row--bottom">
           {showCart ? (
-            <AddToCartControls
+            <LazyAddToCartControls
               key={selected.id}
               productId={selected.id}
               stock={selected.stock}
