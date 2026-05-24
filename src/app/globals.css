@@ -41,12 +41,9 @@
   --muted: #475569;
   --accent: #6b8fd4;
   --accent-hover: #b088a8;
-  --accent-glow-outer:
-    0 0 10px color-mix(in srgb, var(--accent) 38%, transparent),
-    0 0 20px color-mix(in srgb, var(--accent) 20%, transparent);
-  --accent-glow-outer-hover:
-    0 0 14px color-mix(in srgb, var(--accent) 48%, transparent),
-    0 0 26px color-mix(in srgb, var(--accent) 26%, transparent);
+  --accent-glow-outer: 0 0 12px color-mix(in srgb, var(--accent) 42%, transparent), 0 0 22px color-mix(in srgb, var(--accent) 24%, transparent);
+  --accent-glow-outer-hover: 0 0 16px color-mix(in srgb, var(--accent) 52%, transparent), 0 0 28px color-mix(in srgb, var(--accent) 30%, transparent);
+  --accent-glow-text: 0 0 8px color-mix(in srgb, var(--accent) 55%, transparent), 0 0 16px color-mix(in srgb, var(--accent) 32%, transparent);
   --price: #15803d;
   --outline: rgba(15, 23, 42, 0.1);
   --outline-strong: rgba(15, 23, 42, 0.14);
@@ -436,22 +433,21 @@ h1, h2, h3 {
 }
 
 .brand-glow {
-  filter: drop-shadow(0 0 6px color-mix(in srgb, var(--accent) 42%, transparent))
-    drop-shadow(0 0 14px color-mix(in srgb, var(--accent) 24%, transparent));
+  text-shadow: var(--accent-glow-text);
 }
 
-.btn-glass-accent {
+.btn-glass.btn-glass-accent {
   background: color-mix(in srgb, var(--accent) 82%, var(--glass-bg-strong));
   color: white;
   border-color: color-mix(in srgb, var(--accent) 32%, var(--glass-border-strong));
   box-shadow: var(--glass-shadow), var(--accent-glow-outer);
 }
 
-.dark .btn-glass-accent {
+.dark .btn-glass.btn-glass-accent {
   color: #0f172a;
 }
 
-.btn-glass-accent:hover {
+.btn-glass.btn-glass-accent:hover {
   background: color-mix(in srgb, var(--accent) 95%, var(--glass-bg-hover));
   box-shadow: var(--glass-shadow-hover), var(--accent-glow-outer-hover);
 }
