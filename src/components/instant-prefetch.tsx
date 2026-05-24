@@ -24,7 +24,7 @@ export function InstantPrefetch() {
       router.prefetch(href);
     };
 
-    let batchTimer: ReturnType<typeof setTimeout> | undefined;
+    let batchTimer: number | undefined;
     const scheduleBatchPrefetch = () => {
       batchTimer = window.setTimeout(() => {
         for (const route of HOT_ROUTES) {
