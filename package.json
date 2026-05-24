@@ -4,10 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev -p 3001",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "start": "next start -p 3001",
     "lint": "eslint",
-    "db:push": "prisma db push",
+    "db:push": "prisma db push && prisma generate",
     "db:seed": "tsx prisma/seed.ts",
     "db:migrate-admin-username": "tsx scripts/migrate-admin-username.ts",
     "db:migrate-categories": "tsx prisma/migrate-legacy-categories.ts",
