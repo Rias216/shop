@@ -8,6 +8,16 @@ export type AdminSession = {
   username: string;
 };
 
+export function adminSessionCookieSecure(): boolean {
+  if (process.env.NODE_ENV !== "production") return false;
+  const siteUrl =
+    process.env.AUTH_URL ??
+    process.env.NEXTAUTH_URL ??
+    process.env.NEXT_PUBLIC_SITE_URL ??
+    "";
+  return siteUrl.startsWith("https://");
+}
+
 function sessionSecret(): Uint8Array {
   const raw = process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET ?? "";
   if (!raw.trim()) {

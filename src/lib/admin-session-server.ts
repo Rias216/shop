@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import {
   ADMIN_SESSION_COOKIE,
   ADMIN_SESSION_MAX_AGE_SEC,
+  adminSessionCookieSecure,
   type AdminSession,
   signAdminSession,
   verifyAdminSessionToken,
@@ -22,7 +23,7 @@ export async function setAdminSession(admin: AdminSession): Promise<void> {
   store.set(ADMIN_SESSION_COOKIE, token, {
     httpOnly: true,
     sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
+    secure: adminSessionCookieSecure(),
     path: "/",
     maxAge: ADMIN_SESSION_MAX_AGE_SEC,
   });

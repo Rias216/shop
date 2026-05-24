@@ -9,6 +9,7 @@
     "lint": "eslint",
     "db:push": "prisma db push && prisma generate",
     "db:seed": "tsx prisma/seed.ts",
+    "db:reset-admin": "tsx scripts/reset-admin-password.ts",
     "db:migrate-admin-username": "tsx scripts/migrate-admin-username.ts",
     "db:migrate-categories": "tsx prisma/migrate-legacy-categories.ts",
     "db:backfill-nowpayments": "tsx scripts/backfill-nowpayments.ts",
