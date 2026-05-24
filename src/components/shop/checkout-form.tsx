@@ -9,12 +9,16 @@ import { CheckoutCoinSearch } from "@/components/shop/checkout-coin-search";
 import { CheckoutExpand } from "@/components/shop/checkout-expand";
 import { CryptoCoinIcon } from "@/components/shop/crypto-icon";
 import {
+  coinAccentColor,
+  coinPaymentCardGlow,
+} from "@/lib/payments/coin-icon";
+import {
   PRIMARY_CRYPTO_CURRENCIES,
   type PrimaryCryptoPayCurrency,
 } from "@/lib/payments/crypto-currencies";
 import { getCryptoDisplay } from "@/lib/payments/crypto-display";
-import { getStoredThemeChoice, resolveTheme } from "@/lib/theme-client";
 import { formatPrice } from "@/lib/utils";
+import { getStoredThemeChoice, resolveTheme } from "@/lib/theme-client";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -146,8 +150,8 @@ export function CheckoutForm({
           state: data.get("state"),
           postalCode: data.get("postalCode"),
           country: data.get("country"),
-          theme: resolveTheme(getStoredThemeChoice()),
           ...payment,
+          emailTheme: resolveTheme(getStoredThemeChoice()),
           ageConfirmed,
           termsAccepted,
         }),
@@ -185,19 +189,26 @@ export function CheckoutForm({
     description: string;
     className?: string;
   }) {
+    const coinColor = coinAccentColor(coinCode);
+
     return (
       <button
         type="button"
         onClick={onSelect}
+        data-active={active ? "true" : undefined}
         className={cn(
-          "payment-option flex w-full cursor-pointer items-start gap-3 rounded-lg border px-3 py-2.5 text-left transition-colors",
+          "payment-option flex w-full cursor-pointer items-center gap-3 rounded-lg border px-3 py-2.5 text-left",
           active
-            ? "border-accent bg-accent/10 ring-1 ring-accent/30"
-            : "border-[var(--outline-strong)] bg-[var(--glass-bg-subtle)] hover:border-accent/40",
+            ? "border-transparent bg-accent/10"
+            : "border-[var(--outline-strong)] bg-[var(--glass-bg-subtle)]",
           className,
         )}
+        style={{
+          ["--coin-color" as string]: coinColor,
+          ...(active ? { boxShadow: coinPaymentCardGlow(coinColor) } : {}),
+        }}
       >
-        <CryptoCoinIcon code={coinCode} className="mt-0.5" />
+        <CryptoCoinIcon code={coinCode} className="shrink-0" />
         <span className="min-w-0 flex-1">
           <span className="block text-sm font-medium text-foreground">{title}</span>
           <span className="mt-0.5 block text-xs text-muted-foreground">{description}</span>

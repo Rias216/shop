@@ -20,8 +20,7 @@ import {
   skuBaseFromName,
   slugFromName,
 } from "@/lib/product-identifiers";
-import { sendOrderShippedEmail, sendTestEmail } from "@/lib/email";
-import { normalizeEmailTheme } from "@/lib/email-template";
+import { sendOrderShippedEmail, sendTestEmail, resolveEmailTheme } from "@/lib/email";
 import { orderPublicUrl } from "@/lib/orders";
 import { DEFAULT_SETTINGS, getStoreSettings, SETTINGS_ID } from "@/lib/settings";
 import type { ProductCategory } from "@/generated/prisma/client";
@@ -437,7 +436,7 @@ export async function updateOrderStatusAction(formData: FormData) {
         orderId: order.id,
         trackingNumber,
         orderUrl: await orderPublicUrl(order.id, order.accessToken),
-        theme: normalizeEmailTheme(order.emailTheme),
+        theme: resolveEmailTheme(order.emailTheme),
       });
     } catch (error) {
       console.error("[email] shipped notification failed:", error);
@@ -471,7 +470,6 @@ export async function saveStoreSettingsAction(formData: FormData) {
     manualPaymentInstructions: String(
       formData.get("manualPaymentInstructions") ?? existing.manualPaymentInstructions,
     ),
-    manualPaymentEmail: String(formData.get("manualPaymentEmail") ?? existing.manualPaymentEmail).trim(),
     nowpaymentsApiKey: encryptSettingValue(
       pickSecret(formData.get("nowpaymentsApiKey"), existing.nowpaymentsApiKey),
     ),

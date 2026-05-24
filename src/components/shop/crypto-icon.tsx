@@ -3,8 +3,8 @@
 import { useState } from "react";
 import {
   coinAccentColor,
+  coinIconGlowFilter,
   getCoinIconUrl,
-  isSolanaCoinKey,
   normalizeCoinIconKey,
 } from "@/lib/payments/coin-icon";
 import { cn } from "@/lib/utils";
@@ -14,16 +14,29 @@ export type CryptoIconId = "paypal";
 
 type Props = { id: CryptoIconId; className?: string };
 
+const ICON_SIZE = "h-8 w-8";
+
+function coinIconStyle(code: string): React.CSSProperties {
+  const color = coinAccentColor(normalizeCoinIconKey(code) || code);
+  return {
+    filter: coinIconGlowFilter(color),
+    WebkitBackfaceVisibility: "hidden",
+    backfaceVisibility: "hidden",
+    transform: "translateZ(0)",
+  };
+}
+
 function ColoredTickerIcon({ code, className }: { code: string; className?: string }) {
   const key = normalizeCoinIconKey(code) || code;
   const label = key.toUpperCase().slice(0, 4);
   return (
     <span
       className={cn(
-        "inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[0.5rem] font-bold leading-none text-white",
+        "inline-flex shrink-0 items-center justify-center rounded-full text-[0.52rem] font-bold leading-none text-white",
+        ICON_SIZE,
         className,
       )}
-      style={{ background: coinAccentColor(key) }}
+      style={{ background: coinAccentColor(key), ...coinIconStyle(code) }}
       aria-hidden
     >
       {label}
@@ -31,46 +44,30 @@ function ColoredTickerIcon({ code, className }: { code: string; className?: stri
   );
 }
 
-/** Solana brand purple (#9945FF) — CDN pack uses a different palette. */
-function SolanaCoinIcon({ className }: { className?: string }) {
-  const base = cn("h-6 w-6 shrink-0", className);
-  return (
-    <svg viewBox="0 0 32 32" className={base} aria-hidden>
-      <circle cx="16" cy="16" r="16" fill="#9945FF" />
-      <path
-        fill="#fff"
-        d="M10.2 20.8 14.5 11.2h3.1l-4.3 9.6h-3.1zm5.2 0 4.3-9.6h3.1l-4.3 9.6h-3.1zm5.2 0 4.3-9.6H28l-4.3 9.6h-3.3z"
-      />
-    </svg>
-  );
-}
-
 /**
- * Official logos via spothq/cryptocurrency-icons (community-maintained from project brands).
+ * Official logos via spothq/cryptocurrency-icons and Trust Wallet assets (Solana, Litecoin).
  * @see https://github.com/spothq/cryptocurrency-icons
+ * @see https://github.com/trustwallet/assets
  */
 function OfficialCoinIcon({ code, className }: { code: string; className?: string }) {
   const key = normalizeCoinIconKey(code);
   const [failed, setFailed] = useState(false);
-
-  if (isSolanaCoinKey(code)) {
-    return <SolanaCoinIcon className={className} />;
-  }
 
   if (!key || failed) {
     return <ColoredTickerIcon code={code} className={className} />;
   }
 
   return (
-    // eslint-disable-next-line @next/next/no-img-element -- third-party official icon CDN
+    // eslint-disable-next-line @next/next/no-img-element -- official third-party logo CDN
     <img
       src={getCoinIconUrl(key)}
       alt=""
-      width={24}
-      height={24}
+      width={32}
+      height={32}
       loading="lazy"
       decoding="async"
-      className={cn("h-6 w-6 shrink-0 rounded-full object-cover bg-white/10", className)}
+      className={cn("block shrink-0 rounded-full object-cover antialiased", ICON_SIZE, className)}
+      style={coinIconStyle(code)}
       onError={() => setFailed(true)}
     />
   );

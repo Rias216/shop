@@ -23,6 +23,7 @@ export const DEFAULT_SETTINGS: Omit<StoreSettings, "updatedAt"> = {
   manualPaymentEnabled: true,
   manualPaymentInstructions:
     "We will email wire/ACH details after you place your order. Reference your order ID on payment.",
+  manualPaymentEmail: "orders@justpeps.online",
   nowpaymentsApiKey: "",
   nowpaymentsIpnSecret: "",
   resendApiKey: "",

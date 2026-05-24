@@ -41,6 +41,12 @@
   --muted: #475569;
   --accent: #6b8fd4;
   --accent-hover: #b088a8;
+  --accent-glow-outer:
+    0 0 10px color-mix(in srgb, var(--accent) 38%, transparent),
+    0 0 20px color-mix(in srgb, var(--accent) 20%, transparent);
+  --accent-glow-outer-hover:
+    0 0 14px color-mix(in srgb, var(--accent) 48%, transparent),
+    0 0 26px color-mix(in srgb, var(--accent) 26%, transparent);
   --price: #15803d;
   --outline: rgba(15, 23, 42, 0.1);
   --outline-strong: rgba(15, 23, 42, 0.14);
@@ -429,11 +435,16 @@ h1, h2, h3 {
   box-shadow: var(--glass-shadow-hover);
 }
 
+.brand-glow {
+  filter: drop-shadow(0 0 6px color-mix(in srgb, var(--accent) 42%, transparent))
+    drop-shadow(0 0 14px color-mix(in srgb, var(--accent) 24%, transparent));
+}
+
 .btn-glass-accent {
   background: color-mix(in srgb, var(--accent) 82%, var(--glass-bg-strong));
   color: white;
   border-color: color-mix(in srgb, var(--accent) 32%, var(--glass-border-strong));
-  box-shadow: var(--glass-shadow), 0 2px 10px color-mix(in srgb, var(--accent) 14%, transparent);
+  box-shadow: var(--glass-shadow), var(--accent-glow-outer);
 }
 
 .dark .btn-glass-accent {
@@ -442,6 +453,7 @@ h1, h2, h3 {
 
 .btn-glass-accent:hover {
   background: color-mix(in srgb, var(--accent) 95%, var(--glass-bg-hover));
+  box-shadow: var(--glass-shadow-hover), var(--accent-glow-outer-hover);
 }
 
 /* Liquid glass */
@@ -1013,6 +1025,16 @@ h1, h2, h3 {
 /* Checkout */
 .payment-option {
   min-height: 0;
+  --coin-color: var(--accent);
+  transition:
+    border-color var(--duration-normal) var(--ease-snappy),
+    box-shadow var(--duration-normal) var(--ease-snappy),
+    background-color var(--duration-normal) var(--ease-snappy);
+}
+
+.payment-option:not([data-active="true"]):hover {
+  border-color: color-mix(in srgb, var(--coin-color) 30%, transparent) !important;
+  box-shadow: 0 0 14px color-mix(in srgb, var(--coin-color) 16%, transparent);
 }
 
 .checkout-coin-search {

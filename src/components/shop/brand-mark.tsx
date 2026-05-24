@@ -1,22 +1,28 @@
-import { Syringe } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type Props = {
   className?: string;
 };
 
-/** Header brand — Just Peps with syringe mark. */
+/** Header brand lockup — wordmark with trailing emoji mark. */
 export function BrandMark({ className }: Props) {
   return (
-    <span className={cn("inline-flex items-center gap-2.5", className)}>
-      <span className="text-[1.15rem] font-semibold tracking-tight text-foreground md:text-[1.25rem]">
-        Just Peps
+    <span className={cn("inline-flex flex-col leading-none", className)}>
+      <span className="brand-glow flex items-baseline gap-1 text-[1.0625rem] font-semibold tracking-tight md:text-[1.125rem]">
+        <span className="text-foreground">Just</span>
+        <span className="inline-flex items-center gap-0.5">
+          <span className="text-accent">Peps</span>
+          <span
+            className="relative -top-px text-[0.7rem] leading-none select-none md:text-[0.75rem]"
+            aria-hidden
+          >
+            💉
+          </span>
+        </span>
       </span>
-      <Syringe
-        className="h-5 w-5 shrink-0 text-accent"
-        strokeWidth={2}
-        aria-hidden
-      />
+      <span className="mt-1 text-[0.5625rem] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+        Research supply
+      </span>
     </span>
   );
 }
