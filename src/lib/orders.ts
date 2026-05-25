@@ -1,4 +1,5 @@
 import { db } from "./db";
+import { fetchNowPaymentsInvoiceState } from "./payments/nowpayments";
 import { getStoreSettings } from "./settings";
 import { formatPrice } from "./utils";
 import {
@@ -108,6 +109,55 @@ export async function notifyOrderPlaced(params: {
   } catch (error) {
     console.error("[email] order confirmation failed:", error);
   }
+}
+
+const STALE_PENDING_MIN_AGE_MS = 30 * 60 * 1000;
+const SWEEP_BATCH_SIZE = 25;
+
+/**
+ * Poll NOWPayments for any pending CRYPTO orders that are old enough to be
+ * terminal (paid, failed, refunded, or expired) and update them. Safe to call
+ * from server components — bounded and best-effort.
+ */
+export async function sweepStaleCryptoOrders(): Promise<void> {
+  const cutoff = new Date(Date.now() - STALE_PENDING_MIN_AGE_MS);
+  const stale = await db.order.findMany({
+    where: {
+      paymentMethod: "CRYPTO",
+      paymentStatus: "PENDING",
+      cryptoInvoiceId: { not: null },
+      createdAt: { lt: cutoff },
+    },
+    select: { id: true, cryptoInvoiceId: true, paymentStatus: true },
+    orderBy: { createdAt: "asc" },
+    take: SWEEP_BATCH_SIZE,
+  });
+
+  if (stale.length === 0) return;
+
+  await Promise.all(
+    stale.map(async (order) => {
+      if (!order.cryptoInvoiceId) return;
+      try {
+        const state = await fetchNowPaymentsInvoiceState(order.cryptoInvoiceId);
+        if (state === "COMPLETED") {
+          await markOrderPaid(order.id);
+        } else if (state === "FAILED") {
+          await db.order.update({
+            where: { id: order.id },
+            data: { status: "CANCELLED", paymentStatus: "FAILED" },
+          });
+        } else if (state === "REFUNDED") {
+          await db.order.update({
+            where: { id: order.id },
+            data: { status: "CANCELLED", paymentStatus: "REFUNDED" },
+          });
+        }
+      } catch (error) {
+        console.error("[orders] sweep failed for", order.id, error);
+      }
+    }),
+  );
 }
 
 /** @deprecated use notifyOrderPlaced */

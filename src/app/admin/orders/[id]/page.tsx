@@ -52,6 +52,12 @@ export default async function AdminOrderDetailPage({
           <dd>{order.status}</dd>
         </div>
         <div className="flex justify-between">
+          <dt className="text-zinc-500">Payment</dt>
+          <dd>
+            {order.paymentMethod} / {order.paymentStatus}
+          </dd>
+        </div>
+        <div className="flex justify-between">
           <dt className="text-zinc-500">Total</dt>
           <dd className="font-semibold text-price">{formatPrice(order.totalCents)}</dd>
         </div>

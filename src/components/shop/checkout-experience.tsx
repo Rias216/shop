@@ -20,7 +20,7 @@ type Line = {
 type Props = {
   subtotalCents: number;
   cryptoEnabled: boolean;
-  directContactEmails: [string, string];
+  directContactEmail: string;
   lines: Line[];
   initialCouponCode?: string | null;
   initialAppliedCoupon?: AppliedCoupon | null;
@@ -29,7 +29,7 @@ type Props = {
 export function CheckoutExperience({
   subtotalCents,
   cryptoEnabled,
-  directContactEmails,
+  directContactEmail,
   lines,
   initialCouponCode,
   initialAppliedCoupon,
@@ -72,7 +72,7 @@ export function CheckoutExperience({
         <div className="mt-6">
           <CheckoutForm
             cryptoEnabled={cryptoEnabled}
-            directContactEmails={directContactEmails}
+            directContactEmail={directContactEmail}
             couponCode={appliedCoupon?.code}
             orderTotalCents={quote.totalCents}
           />

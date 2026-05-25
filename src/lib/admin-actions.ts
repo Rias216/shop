@@ -20,7 +20,13 @@ import {
   skuBaseFromName,
   slugFromName,
 } from "@/lib/product-identifiers";
-import { sendOrderShippedEmail, sendTestEmail, resolveEmailTheme } from "@/lib/email";
+import {
+  sendOrderShippedEmail,
+  sendPaymentConfirmedEmail,
+  sendTestEmail,
+  resolveEmailTheme,
+} from "@/lib/email";
+import { formatPrice } from "@/lib/utils";
 import { orderPublicUrl } from "@/lib/orders";
 import { DEFAULT_SETTINGS, getStoreSettings, SETTINGS_ID } from "@/lib/settings";
 import type { ProductCategory } from "@/generated/prisma/client";
@@ -415,16 +421,50 @@ export async function uploadCoaAction(formData: FormData) {
   redirect(`/admin/products/${productId}?coa=1`);
 }
 
+type OrderStatus = "AWAITING_PAYMENT" | "PAID" | "SHIPPED" | "CANCELLED";
+type PaymentStatus = "PENDING" | "COMPLETED" | "FAILED" | "REFUNDED";
+
+/** Derive the payment status from a new admin-chosen order status. */
+function derivePaymentStatus(
+  newStatus: OrderStatus,
+  currentPaymentStatus: PaymentStatus,
+): PaymentStatus {
+  switch (newStatus) {
+    case "PAID":
+    case "SHIPPED":
+      return "COMPLETED";
+    case "AWAITING_PAYMENT":
+      return "PENDING";
+    case "CANCELLED":
+      return currentPaymentStatus === "COMPLETED" ? "REFUNDED" : "FAILED";
+  }
+}
+
 export async function updateOrderStatusAction(formData: FormData) {
   await requireAdmin();
   const orderId = formData.get("orderId") as string;
-  const status = formData.get("status") as string;
+  const status = formData.get("status") as OrderStatus;
   const trackingNumber = (formData.get("trackingNumber") as string) || null;
+
+  const previous = await db.order.findUnique({
+    where: { id: orderId },
+    select: { paymentStatus: true },
+  });
+  if (!previous) {
+    redirect("/admin/orders");
+  }
+
+  const nextPaymentStatus = derivePaymentStatus(
+    status,
+    previous.paymentStatus as PaymentStatus,
+  );
+  const wasNotPaid = previous.paymentStatus !== "COMPLETED";
 
   const order = await db.order.update({
     where: { id: orderId },
     data: {
-      status: status as "SHIPPED" | "CANCELLED" | "PAID" | "AWAITING_PAYMENT",
+      status,
+      paymentStatus: nextPaymentStatus,
       trackingNumber,
     },
   });
@@ -440,6 +480,20 @@ export async function updateOrderStatusAction(formData: FormData) {
       });
     } catch (error) {
       console.error("[email] shipped notification failed:", error);
+    }
+  }
+
+  if ((status === "PAID" || status === "SHIPPED") && wasNotPaid) {
+    try {
+      await sendPaymentConfirmedEmail({
+        to: order.email,
+        orderId: order.id,
+        totalFormatted: formatPrice(order.totalCents),
+        orderUrl: await orderPublicUrl(order.id, order.accessToken),
+        theme: resolveEmailTheme(order.emailTheme),
+      });
+    } catch (error) {
+      console.error("[email] payment confirmation failed:", error);
     }
   }
 

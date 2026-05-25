@@ -192,8 +192,8 @@ export function SettingsForm({
               id="manualPaymentInstructions"
               name="manualPaymentInstructions"
               defaultValue={settings.manualPaymentInstructions}
-              rows={3}
-              className="mt-1 w-full rounded-xl border border-[var(--glass-border)] bg-[var(--glass-bg-subtle)] px-3 py-2 text-sm"
+              rows={5}
+              className="mt-1 w-full rounded-xl border border-[var(--glass-border)] bg-[var(--glass-bg-subtle)] px-3 py-2 text-sm text-foreground backdrop-blur-sm"
             />
           </p>
         </Section>

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { CheckoutExperienceLoader } from "@/components/shop/checkout-experience-loader";
 import { getCouponCodeFromCookie } from "@/lib/coupon-cookie";
 import { getAppliedCouponFromCookie } from "@/lib/coupons";
-import { getDirectPaymentEmails } from "@/lib/payments/direct-contact";
+import { getDirectPaymentEmail } from "@/lib/payments/direct-contact";
 import { resolveCartFromCookie } from "@/lib/resolve-cart";
 import { getStoreSettings } from "@/lib/settings";
 
@@ -44,7 +44,7 @@ export default async function CheckoutPage() {
       <CheckoutExperienceLoader
         subtotalCents={subtotalCents}
         cryptoEnabled={settings.cryptoEnabled}
-        directContactEmails={getDirectPaymentEmails(settings.emailFrom)}
+        directContactEmail={getDirectPaymentEmail(settings.emailFrom)}
         initialCouponCode={initialCouponCode}
         initialAppliedCoupon={initialAppliedCoupon}
         lines={lines.map((l) => ({

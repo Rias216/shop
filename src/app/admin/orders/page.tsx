@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { db } from "@/lib/db";
+import { sweepStaleCryptoOrders } from "@/lib/orders";
 import { formatPrice } from "@/lib/utils";
 
 export default async function AdminOrdersPage() {
+  await sweepStaleCryptoOrders();
   const orders = await db.order.findMany({
     orderBy: { createdAt: "desc" },
     include: { items: true },

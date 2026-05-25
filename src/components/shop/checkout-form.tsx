@@ -23,7 +23,7 @@ import { cn } from "@/lib/utils";
 
 type Props = {
   cryptoEnabled: boolean;
-  directContactEmails: [string, string];
+  directContactEmail: string;
   couponCode?: string;
   orderTotalCents: number;
 };
@@ -48,7 +48,7 @@ const PRIMARY_META: Record<
 
 export function CheckoutForm({
   cryptoEnabled,
-  directContactEmails,
+  directContactEmail,
   couponCode,
   orderTotalCents,
 }: Props) {
@@ -68,7 +68,7 @@ export function CheckoutForm({
   const [showMoreCrypto, setShowMoreCrypto] = useState(false);
   const [showDirectPay, setShowDirectPay] = useState(false);
 
-  const [ordersEmail, paymentsEmail] = directContactEmails;
+  const ordersEmail = directContactEmail;
   const isSearching = currencyFilter.trim().length > 0;
 
   async function loadOtherCurrencies() {
@@ -371,23 +371,11 @@ export function CheckoutForm({
             <p className="text-xs leading-relaxed text-muted-foreground">
               Email us before or after placing your order to arrange payment:
             </p>
-            <ul className="space-y-1 text-sm">
-              <li>
-                <a href={`mailto:${ordersEmail}`} className="font-medium text-accent hover:underline">
-                  {ordersEmail}
-                </a>
-                <span className="text-muted-foreground"> — orders &amp; checkout help</span>
-              </li>
-              <li>
-                <a
-                  href={`mailto:${paymentsEmail}`}
-                  className="font-medium text-accent hover:underline"
-                >
-                  {paymentsEmail}
-                </a>
-                <span className="text-muted-foreground"> — payment options &amp; invoicing</span>
-              </li>
-            </ul>
+            <p className="text-sm">
+              <a href={`mailto:${ordersEmail}`} className="font-medium text-accent hover:underline">
+                {ordersEmail}
+              </a>
+            </p>
           </CheckoutExpand>
         </div>
 
