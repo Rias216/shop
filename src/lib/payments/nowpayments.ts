@@ -120,10 +120,10 @@ export async function assertPayCurrencyAllowed(code: string): Promise<string> {
   if (!isValidCurrencyCode(normalized)) {
     throw new Error("Invalid cryptocurrency.");
   }
-  const available = await fetchNowPaymentsCurrencies();
-  if (available.length > 0 && !available.includes(normalized)) {
-    throw new Error("That cryptocurrency is not available right now. Pick another coin.");
-  }
+  // Don't gate against /v1/currencies here — the endpoint returns ticker
+  // variants that don't always match the short codes shown in the UI
+  // (e.g. "btc" vs "btcbsc"), which can falsely block every coin. NOWPayments
+  // will reject unsupported coins at invoice creation with a clearer error.
   return normalized;
 }
 
