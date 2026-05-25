@@ -440,6 +440,50 @@ function derivePaymentStatus(
   }
 }
 
+export async function refreshOrderFromProviderAction(formData: FormData) {
+  await requireAdmin();
+  const orderId = formData.get("orderId") as string;
+  const order = await db.order.findUnique({
+    where: { id: orderId },
+    select: {
+      id: true,
+      paymentMethod: true,
+      paymentStatus: true,
+      cryptoInvoiceId: true,
+    },
+  });
+
+  if (order?.paymentMethod === "CRYPTO" && order.cryptoInvoiceId) {
+    const { fetchNowPaymentsInvoiceState } = await import(
+      "@/lib/payments/nowpayments"
+    );
+    const { markOrderPaid } = await import("@/lib/orders");
+
+    try {
+      const state = await fetchNowPaymentsInvoiceState(order.cryptoInvoiceId);
+      if (state === "COMPLETED" && order.paymentStatus !== "COMPLETED") {
+        await markOrderPaid(order.id);
+      } else if (state === "FAILED") {
+        await db.order.update({
+          where: { id: order.id },
+          data: { status: "CANCELLED", paymentStatus: "FAILED" },
+        });
+      } else if (state === "REFUNDED") {
+        await db.order.update({
+          where: { id: order.id },
+          data: { status: "CANCELLED", paymentStatus: "REFUNDED" },
+        });
+      }
+    } catch (error) {
+      console.error("[admin] refresh order failed", error);
+    }
+  }
+
+  revalidatePath("/admin/orders");
+  revalidatePath(`/admin/orders/${orderId}`);
+  redirect(`/admin/orders/${orderId}`);
+}
+
 export async function updateOrderStatusAction(formData: FormData) {
   await requireAdmin();
   const orderId = formData.get("orderId") as string;

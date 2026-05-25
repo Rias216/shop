@@ -2,7 +2,10 @@ import { notFound } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { updateOrderStatusAction } from "@/lib/admin-actions";
+import {
+  refreshOrderFromProviderAction,
+  updateOrderStatusAction,
+} from "@/lib/admin-actions";
 import { db } from "@/lib/db";
 import { formatOrderQty } from "@/lib/order-qty";
 import { formatPrice } from "@/lib/utils";
@@ -90,6 +93,21 @@ export default async function AdminOrderDetailPage({
           </li>
         ))}
       </ul>
+      {order.paymentMethod === "CRYPTO" && order.cryptoInvoiceId && (
+        <form
+          action={refreshOrderFromProviderAction}
+          className="mt-6 rounded-lg border border-zinc-200 p-4 dark:border-zinc-800"
+        >
+          <input type="hidden" name="orderId" value={order.id} />
+          <p className="text-sm text-zinc-500">
+            Poll NOWPayments for the latest status of invoice{" "}
+            <code className="font-mono text-xs">{order.cryptoInvoiceId}</code>.
+          </p>
+          <Button type="submit" variant="outline" className="mt-3">
+            Refresh from NOWPayments
+          </Button>
+        </form>
+      )}
       <form action={updateOrderStatusAction} className="mt-10 space-y-4 rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
         <input type="hidden" name="orderId" value={order.id} />
         <p>
