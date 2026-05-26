@@ -440,6 +440,28 @@ function derivePaymentStatus(
   }
 }
 
+export async function deleteOrderAction(formData: FormData) {
+  await requireAdmin();
+  const orderId = formData.get("orderId") as string;
+  if (!orderId) {
+    redirect("/admin/orders");
+  }
+  await db.order.delete({ where: { id: orderId } });
+  revalidatePath("/admin/orders");
+  redirect("/admin/orders");
+}
+
+export async function deleteAllOrdersAction(formData: FormData) {
+  await requireAdmin();
+  const confirm = String(formData.get("confirm") ?? "").trim();
+  if (confirm !== "DELETE") {
+    redirect("/admin/orders?wipeError=1");
+  }
+  await db.order.deleteMany({});
+  revalidatePath("/admin/orders");
+  redirect("/admin/orders?wiped=1");
+}
+
 export async function refreshOrderFromProviderAction(formData: FormData) {
   await requireAdmin();
   const orderId = formData.get("orderId") as string;

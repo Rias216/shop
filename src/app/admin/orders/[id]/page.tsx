@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
+  deleteOrderAction,
   refreshOrderFromProviderAction,
   updateOrderStatusAction,
 } from "@/lib/admin-actions";
@@ -134,6 +135,19 @@ export default async function AdminOrderDetailPage({
           />
         </p>
         <Button type="submit">Save</Button>
+      </form>
+
+      <form
+        action={deleteOrderAction}
+        className="mt-6 rounded-lg border border-red-200 p-4 dark:border-red-900"
+      >
+        <input type="hidden" name="orderId" value={order.id} />
+        <p className="text-sm text-zinc-500">
+          Permanently delete this order and its line items. This cannot be undone.
+        </p>
+        <Button type="submit" variant="destructive" size="sm" className="mt-3">
+          Delete order
+        </Button>
       </form>
     </article>
   );
