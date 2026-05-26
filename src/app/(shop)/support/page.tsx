@@ -15,8 +15,12 @@ const FAQ = [
     a: "Certificates of Analysis are linked on product pages when we have a batch on file. Not every SKU has a COA uploaded yet.",
   },
   {
-    q: "Shipping",
-    a: "Shipping timelines and carriers depend on your region and order volume. Contact us after placing an order if you need tracking details.",
+    q: "Where do you ship?",
+    a: "We ship to the United States and Europe only. Orders outside these regions cannot be fulfilled.",
+  },
+  {
+    q: "Shipping times",
+    a: "Orders ship from our warehouse in the United States (for US orders) or our warehouse in China (for European orders). Delivery takes 5–14 business days after payment is confirmed, depending on destination and carrier.",
   },
 ] as const;
 
