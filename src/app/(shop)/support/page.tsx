@@ -26,7 +26,7 @@ const FAQ = [
 
 export default async function SupportPage() {
   const settings = await getStoreSettings();
-  const contactEmail = settings.emailFrom;
+  const contactEmail = "justpeps@proton.me";
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-10 md:py-14">
