@@ -20,7 +20,7 @@ const FAQ = [
   },
   {
     q: "Shipping times",
-    a: "Orders ship from our warehouse in China. Delivery takes 5–14 business days after payment is confirmed, depending on destination and carrier.",
+    a: "Delivery takes 5–14 business days after payment is confirmed, depending on destination and carrier.",
   },
 ] as const;
 
