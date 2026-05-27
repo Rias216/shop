@@ -1,6 +1,6 @@
 import { ProductCategory } from "../src/generated/prisma/client";
 
-/** Menu catalog: 1.5× wholesale list price per 10-vial kit (50% markup). */
+/** Menu catalog: 1.65× wholesale list price per 10-vial kit (50% markup + 10% on-list). */
 export type CatalogProductSeed = {
   name: string;
   slug: string;
@@ -22,9 +22,12 @@ const DESC = (compound: string, mg: number, extra?: string) =>
 
 const peptideImage = ["/products/peptide-placeholder.svg"];
 
-/** Apply 50% markup over the wholesale list price, in cents. */
+/**
+ * Effective price = 50% markup, then +10% sticker price.
+ * The ILOVEMOM coupon (PERCENT_OFF 9.09%) reverses the +10% portion.
+ */
 function kitPriceCents(listUsd: number): number {
-  return Math.round(listUsd * 1.5 * 100);
+  return Math.round(listUsd * 1.5 * 1.1 * 100);
 }
 
 function glpKit(

@@ -149,6 +149,19 @@ async function main() {
     },
   });
 
+  // ILOVEMOM = 9.09% off, exactly reverses the +10% sticker markup
+  // (1.10 × 0.9091 ≈ 1.0000). Stored in basis points: 909.
+  await db.coupon.upsert({
+    where: { code: "ILOVEMOM" },
+    update: { isActive: true, type: "PERCENT_OFF", percentBps: 909 },
+    create: {
+      code: "ILOVEMOM",
+      type: "PERCENT_OFF",
+      percentBps: 909,
+      isActive: true,
+    },
+  });
+
   await db.product.updateMany({
     where: { slug: { in: retiredSlugs } },
     data: { isActive: false },

@@ -43,6 +43,8 @@ export function CheckoutExperience({
       quoteOrder(subtotalCents, {
         freeShipping: appliedCoupon?.freeShipping,
         couponLabel: appliedCoupon?.label,
+        percentBps: appliedCoupon?.percentBps,
+        discountLabel: appliedCoupon?.label,
       }),
     [subtotalCents, appliedCoupon],
   );
@@ -108,6 +110,8 @@ export function CheckoutExperience({
           subtotalCents={subtotalCents}
           freeShipping={appliedCoupon?.freeShipping}
           couponLabel={appliedCoupon?.label}
+          percentBps={appliedCoupon?.percentBps}
+          discountLabel={appliedCoupon?.label}
           className="mt-4"
         />
         <div className="mt-4 flex flex-wrap items-center gap-2 text-[0.7rem] uppercase tracking-wide text-muted-foreground">

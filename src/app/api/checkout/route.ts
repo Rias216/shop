@@ -127,9 +127,9 @@ export async function POST(request: Request) {
     }
 
     let couponFreeShipping = false;
+    let couponPercentBps: number | undefined;
     let couponLabel: string | undefined;
     let storedCouponCode: string | undefined;
-    let discountCents = 0;
 
     if (body.couponCode?.trim()) {
       const couponResult = await perf.time("coupon_validate", () =>
@@ -144,6 +144,9 @@ export async function POST(request: Request) {
       if (couponResult.coupon.freeShipping) {
         couponFreeShipping = true;
       }
+      if (couponResult.coupon.percentBps && couponResult.coupon.percentBps > 0) {
+        couponPercentBps = couponResult.coupon.percentBps;
+      }
     }
 
     const baseQuote = perf.time("quote_base", async () => quoteOrder(subtotalCents));
@@ -151,12 +154,15 @@ export async function POST(request: Request) {
       quoteOrder(subtotalCents, {
         freeShipping: couponFreeShipping,
         couponLabel,
+        percentBps: couponPercentBps,
+        discountLabel: couponLabel,
       }),
     );
     const [baseQuoteResolved, orderQuoteResolved] = await Promise.all([baseQuote, orderQuote]);
     const { shippingCents, totalCents, label: shippingLabel } = orderQuoteResolved;
+    let discountCents = orderQuoteResolved.discountCents;
     if (couponFreeShipping) {
-      discountCents = baseQuoteResolved.shippingCents;
+      discountCents += baseQuoteResolved.shippingCents;
     }
 
     const shippingAddress = {

@@ -47,6 +47,7 @@ enum ReviewStatus {
 
 enum CouponType {
   FREE_SHIPPING
+  PERCENT_OFF
 }
 
 model AdminUser {
@@ -139,6 +140,8 @@ model Coupon {
   code       String     @unique
   type       CouponType
   isActive   Boolean    @default(true)
+  /** For PERCENT_OFF: discount in basis points (1/10000). E.g. 909 = 9.09%. */
+  percentBps Int?
   maxUses    Int?
   usedCount  Int        @default(0)
   expiresAt  DateTime?

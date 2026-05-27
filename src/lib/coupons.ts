@@ -15,6 +15,8 @@ export type AppliedCoupon = {
   code: string;
   type: CouponType;
   freeShipping: boolean;
+  /** Basis points (1/10000). Set when type === "PERCENT_OFF". */
+  percentBps?: number;
   label: string;
 };
 
@@ -72,6 +74,17 @@ function toAppliedCoupon(coupon: Coupon): AppliedCoupon {
       type: coupon.type,
       freeShipping: true,
       label: "Free shipping",
+    };
+  }
+  if (coupon.type === "PERCENT_OFF") {
+    const bps = coupon.percentBps ?? 0;
+    const pctLabel = (bps / 100).toFixed(bps % 100 === 0 ? 0 : 2);
+    return {
+      code: coupon.code.toUpperCase(),
+      type: coupon.type,
+      freeShipping: false,
+      percentBps: bps,
+      label: `${pctLabel}% off`,
     };
   }
   return {
