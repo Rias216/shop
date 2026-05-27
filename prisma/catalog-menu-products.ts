@@ -1,6 +1,6 @@
 import { ProductCategory } from "../src/generated/prisma/client";
 
-/** Menu catalog: 2× list price per 10-vial kit (matches order step of 10 vials) */
+/** Menu catalog: 1.5× wholesale list price per 10-vial kit (50% markup). */
 export type CatalogProductSeed = {
   name: string;
   slug: string;
@@ -22,8 +22,9 @@ const DESC = (compound: string, mg: number, extra?: string) =>
 
 const peptideImage = ["/products/peptide-placeholder.svg"];
 
-function usd2x(dollars: number): number {
-  return Math.round(dollars * 2 * 100);
+/** Apply 50% markup over the wholesale list price, in cents. */
+function kitPriceCents(listUsd: number): number {
+  return Math.round(listUsd * 1.5 * 100);
 }
 
 function glpKit(
@@ -39,8 +40,8 @@ function glpKit(
     sku: `GLP-${code}`,
     category: ProductCategory.GLP1_METABOLIC,
     description: DESC(`${compound} research peptide`, mg),
-    priceCents: usd2x(listUsd),
-    stock: 100,
+    priceCents: kitPriceCents(listUsd),
+    stock: 9999,
     purity: "≥98%",
     images: peptideImage,
     groupKey: base,
@@ -65,8 +66,8 @@ function groupedPeptideKit(args: {
     sku: args.sku,
     category: args.category,
     description: DESC(`${args.name} research peptide`, args.mg, args.extra),
-    priceCents: usd2x(args.listUsd),
-    stock: 100,
+    priceCents: kitPriceCents(args.listUsd),
+    stock: 9999,
     purity: args.purity ?? "≥98%",
     images: peptideImage,
     groupKey: args.groupKey,
@@ -142,8 +143,8 @@ export const catalogMenuProducts: CatalogProductSeed[] = [
     sku: "SX10",
     category: ProductCategory.NEUROPEPTIDE,
     description: DESC("Semax research peptide", 10),
-    priceCents: usd2x(55),
-    stock: 100,
+    priceCents: kitPriceCents(55),
+    stock: 9999,
     purity: "≥99%",
     images: peptideImage,
   },
@@ -153,8 +154,8 @@ export const catalogMenuProducts: CatalogProductSeed[] = [
     sku: "SK10",
     category: ProductCategory.NEUROPEPTIDE,
     description: DESC("Selank research peptide", 10),
-    priceCents: usd2x(55),
-    stock: 100,
+    priceCents: kitPriceCents(55),
+    stock: 9999,
     purity: "≥99%",
     images: peptideImage,
   },
@@ -164,8 +165,8 @@ export const catalogMenuProducts: CatalogProductSeed[] = [
     sku: "SLUPP332",
     category: ProductCategory.MITOCHONDRIAL,
     description: DESC("SLU-PP-332 research compound", 5),
-    priceCents: usd2x(65),
-    stock: 100,
+    priceCents: kitPriceCents(65),
+    stock: 9999,
     purity: "≥98%",
     images: peptideImage,
   },
@@ -175,8 +176,8 @@ export const catalogMenuProducts: CatalogProductSeed[] = [
     sku: "EPI10",
     category: ProductCategory.LONGEVITY,
     description: DESC("Epithalon research peptide", 10),
-    priceCents: usd2x(55),
-    stock: 100,
+    priceCents: kitPriceCents(55),
+    stock: 9999,
     purity: "≥98%",
     images: peptideImage,
   },
@@ -186,8 +187,8 @@ export const catalogMenuProducts: CatalogProductSeed[] = [
     sku: "SS31",
     category: ProductCategory.MITOCHONDRIAL,
     description: DESC("SS-31 research peptide", 10),
-    priceCents: usd2x(100),
-    stock: 100,
+    priceCents: kitPriceCents(100),
+    stock: 9999,
     purity: "≥98%",
     images: peptideImage,
   },
@@ -197,8 +198,8 @@ export const catalogMenuProducts: CatalogProductSeed[] = [
     sku: "IPA10",
     category: ProductCategory.GROWTH_SECRETAGOGUE,
     description: DESC("Ipamorelin research peptide", 10),
-    priceCents: usd2x(75),
-    stock: 100,
+    priceCents: kitPriceCents(75),
+    stock: 9999,
     purity: "≥98%",
     images: peptideImage,
   },
@@ -208,8 +209,8 @@ export const catalogMenuProducts: CatalogProductSeed[] = [
     sku: "MT2",
     category: ProductCategory.MELANOCORTIN,
     description: DESC("MT-2 research peptide", 10),
-    priceCents: usd2x(55),
-    stock: 100,
+    priceCents: kitPriceCents(55),
+    stock: 9999,
     purity: "≥98%",
     images: peptideImage,
   },
@@ -239,8 +240,8 @@ export const catalogMenuProducts: CatalogProductSeed[] = [
     sku: "BB10",
     category: ProductCategory.HEALING_REPAIR,
     description: DESC("TB-500 and BPC-157 blend", 10, "Dual-peptide research formulation."),
-    priceCents: usd2x(120),
-    stock: 100,
+    priceCents: kitPriceCents(120),
+    stock: 9999,
     purity: "≥98%",
     images: peptideImage,
   },
@@ -250,8 +251,8 @@ export const catalogMenuProducts: CatalogProductSeed[] = [
     sku: "KPV",
     category: ProductCategory.HEALING_REPAIR,
     description: DESC("KPV research peptide", 10),
-    priceCents: usd2x(55),
-    stock: 100,
+    priceCents: kitPriceCents(55),
+    stock: 9999,
     purity: "≥98%",
     images: peptideImage,
   },
@@ -262,8 +263,8 @@ export const catalogMenuProducts: CatalogProductSeed[] = [
     category: ProductCategory.SUPPLIES,
     description:
       "Bacteriostatic water for laboratory reconstitution. 3ml/vial, 10 vials/kit. Not for injection or human use.",
-    priceCents: usd2x(10),
-    stock: 100,
+    priceCents: kitPriceCents(10),
+    stock: 9999,
     purity: "≥99%",
     images: peptideImage,
     groupKey: "bac-water",
@@ -276,8 +277,8 @@ export const catalogMenuProducts: CatalogProductSeed[] = [
     category: ProductCategory.SUPPLIES,
     description:
       "Bacteriostatic water for laboratory reconstitution. 10ml/vial, 10 vials/kit. Not for injection or human use.",
-    priceCents: usd2x(25),
-    stock: 100,
+    priceCents: kitPriceCents(25),
+    stock: 9999,
     purity: "≥99%",
     images: peptideImage,
     groupKey: "bac-water",

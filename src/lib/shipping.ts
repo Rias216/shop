@@ -1,11 +1,8 @@
 /** Flat shipping before discounts (USD $50). */
 export const SHIPPING_FLAT_CENTS = 5_000;
 
-/** Subtotal at or above this → free shipping ($500). */
-export const SHIPPING_FREE_MIN_CENTS = 50_000;
-
-/** Subtotal at or above this → 50% off shipping ($300). */
-export const SHIPPING_HALF_MIN_CENTS = 30_000;
+/** Subtotal at or above this → free shipping ($300). */
+export const SHIPPING_FREE_MIN_CENTS = 30_000;
 
 export type ShippingQuote = {
   subtotalCents: number;
@@ -24,12 +21,6 @@ export function calculateShipping(subtotalCents: number): Pick<
   }
   if (subtotalCents >= SHIPPING_FREE_MIN_CENTS) {
     return { shippingCents: 0, label: "Free shipping" };
-  }
-  if (subtotalCents >= SHIPPING_HALF_MIN_CENTS) {
-    return {
-      shippingCents: Math.round(SHIPPING_FLAT_CENTS / 2),
-      label: "50% off shipping",
-    };
   }
   return { shippingCents: SHIPPING_FLAT_CENTS, label: "Standard shipping" };
 }
@@ -61,9 +52,5 @@ export function shippingHint(subtotalCents: number): string | null {
   if (subtotalCents <= 0) return null;
   if (subtotalCents >= SHIPPING_FREE_MIN_CENTS) return null;
   const toFree = SHIPPING_FREE_MIN_CENTS - subtotalCents;
-  if (subtotalCents >= SHIPPING_HALF_MIN_CENTS) {
-    return `Add $${(toFree / 100).toFixed(2)} more for free shipping`;
-  }
-  const toHalf = SHIPPING_HALF_MIN_CENTS - subtotalCents;
-  return `Add $${(toHalf / 100).toFixed(2)} more for 50% off shipping ($25)`;
+  return `Add $${(toFree / 100).toFixed(2)} more for free shipping`;
 }

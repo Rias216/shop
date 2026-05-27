@@ -38,7 +38,7 @@ const products = [
     description:
       "Synthetic pentadecapeptide for in-vitro laboratory research. Lyophilized powder, ≥98% purity by HPLC.",
     priceCents: 4999,
-    stock: 50,
+    stock: 9999,
     purity: "≥98%",
     casNumber: "137525-51-0",
     images: ["/products/peptide-placeholder.svg"],
@@ -51,7 +51,7 @@ const products = [
     description:
       "GLP-1 receptor agonist analog supplied for non-clinical research applications only.",
     priceCents: 8999,
-    stock: 30,
+    stock: 9999,
     purity: "≥97%",
     images: ["/products/peptide-placeholder.svg"],
   },
@@ -63,7 +63,7 @@ const products = [
     description:
       "Thymosin beta-4 fragment for cell migration and tissue repair research in vitro.",
     priceCents: 5499,
-    stock: 40,
+    stock: 9999,
     purity: "≥98%",
     images: ["/products/peptide-placeholder.svg"],
   },
