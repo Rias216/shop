@@ -157,31 +157,45 @@ async function main() {
   const allProducts = [...products, ...catalogMenuProducts];
 
   for (const p of allProducts) {
-    const product = await db.product.upsert({
-      where: { slug: p.slug },
-      update: {
-        name: p.name,
-        sku: p.sku,
-        category: p.category,
-        description: p.description,
-        priceCents: p.priceCents,
-        stock: p.stock,
-        purity: p.purity,
-        casNumber: p.casNumber ?? null,
-        images: p.images,
-        legalNotice: LEGAL_NOTICE,
-        isActive: true,
-        groupKey: "groupKey" in p ? (p.groupKey ?? null) : null,
-        variantLabel: "variantLabel" in p ? (p.variantLabel ?? null) : null,
-      },
-      create: {
-        ...p,
-        casNumber: p.casNumber ?? null,
-        legalNotice: LEGAL_NOTICE,
-        groupKey: "groupKey" in p ? (p.groupKey ?? null) : null,
-        variantLabel: "variantLabel" in p ? (p.variantLabel ?? null) : null,
-      },
-    });
+    const groupKey = "groupKey" in p ? (p.groupKey ?? null) : null;
+    const variantLabel = "variantLabel" in p ? (p.variantLabel ?? null) : null;
+    const updateData = {
+      name: p.name,
+      sku: p.sku,
+      category: p.category,
+      description: p.description,
+      priceCents: p.priceCents,
+      stock: p.stock,
+      purity: p.purity,
+      casNumber: p.casNumber ?? null,
+      images: p.images,
+      legalNotice: LEGAL_NOTICE,
+      isActive: true,
+      groupKey,
+      variantLabel,
+      slug: p.slug,
+    };
+
+    // Match by slug first, then by sku — covers DBs where a product was
+    // previously seeded with a different slug for the same sku, or vice versa.
+    const existing =
+      (await db.product.findUnique({ where: { slug: p.slug } })) ??
+      (await db.product.findUnique({ where: { sku: p.sku } }));
+
+    const product = existing
+      ? await db.product.update({
+          where: { id: existing.id },
+          data: updateData,
+        })
+      : await db.product.create({
+          data: {
+            ...p,
+            casNumber: p.casNumber ?? null,
+            legalNotice: LEGAL_NOTICE,
+            groupKey,
+            variantLabel,
+          },
+        });
 
     const coaExists = await db.coaDocument.findFirst({
       where: { productId: product.id, batchCode: "BATCH-2025-001" },
