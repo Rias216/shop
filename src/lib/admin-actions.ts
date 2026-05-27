@@ -672,14 +672,24 @@ export async function saveCouponAction(formData: FormData) {
     .trim()
     .toUpperCase();
   const type = String(formData.get("type") ?? "FREE_SHIPPING");
+  const percentRaw = String(formData.get("percent") ?? "").trim();
   const maxUsesRaw = String(formData.get("maxUses") ?? "").trim();
   const expiresRaw = String(formData.get("expiresAt") ?? "").trim();
 
   if (!code || code.length < 3) {
     redirect("/admin/coupons?error=code");
   }
-  if (type !== "FREE_SHIPPING") {
+  if (type !== "FREE_SHIPPING" && type !== "PERCENT_OFF") {
     redirect("/admin/coupons?error=type");
+  }
+
+  let percentBps: number | null = null;
+  if (type === "PERCENT_OFF") {
+    const pct = Number(percentRaw);
+    if (!Number.isFinite(pct) || pct <= 0 || pct > 100) {
+      redirect("/admin/coupons?error=percent");
+    }
+    percentBps = Math.round(pct * 100);
   }
 
   const maxUses = maxUsesRaw ? Number(maxUsesRaw) : null;
@@ -696,13 +706,15 @@ export async function saveCouponAction(formData: FormData) {
     where: { code },
     create: {
       code,
-      type: "FREE_SHIPPING",
+      type,
       isActive: true,
+      percentBps,
       maxUses,
       expiresAt,
     },
     update: {
-      type: "FREE_SHIPPING",
+      type,
+      percentBps,
       maxUses,
       expiresAt,
     },

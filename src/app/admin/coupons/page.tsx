@@ -16,8 +16,7 @@ export default async function AdminCouponsPage({
       <header>
         <h1 className="text-2xl font-semibold text-foreground">Coupons</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Manage checkout discount codes. Use <strong className="font-mono">FREESHIP</strong> for
-          free shipping.
+          Manage checkout discount codes. Supports free shipping and percent-off coupons.
         </p>
       </header>
 
@@ -55,7 +54,15 @@ export default async function AdminCouponsPage({
                 coupons.map((c) => (
                   <tr key={c.id} className="border-b border-[var(--outline)] last:border-0">
                     <td className="px-4 py-3 font-mono font-medium">{c.code}</td>
-                    <td className="px-4 py-3">Free shipping</td>
+                    <td className="px-4 py-3">
+                      {c.type === "FREE_SHIPPING"
+                        ? "Free shipping"
+                        : c.type === "PERCENT_OFF"
+                          ? `${((c.percentBps ?? 0) / 100).toFixed(
+                              (c.percentBps ?? 0) % 100 === 0 ? 0 : 2,
+                            )}% off`
+                          : c.type}
+                    </td>
                     <td className="px-4 py-3 tabular-nums">
                       {c.usedCount}
                       {c.maxUses != null ? ` / ${c.maxUses}` : ""}
